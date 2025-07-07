@@ -22,11 +22,11 @@ export function AppSidebar() {
   const isActive = (path: string) => pathname === path;
 
   const menuItems = [
-    { href: '/', label: 'Dashboard', icon: LayoutDashboard },
-    { href: '/products', label: 'Products', icon: Boxes },
-    { href: '/inventory', label: 'Inventory', icon: Warehouse },
-    { href: '/returns', label: 'Returns', icon: Undo2 },
-    { href: '/reports', label: 'Reports', icon: AreaChart },
+    { href: '/', label: 'لوحة التحكم', icon: LayoutDashboard },
+    { href: '/products', label: 'المنتجات', icon: Boxes },
+    { href: '/inventory', label: 'المخزون', icon: Warehouse },
+    { href: '/returns', label: 'المرتجعات', icon: Undo2 },
+    { href: '/reports', label: 'التقارير', icon: AreaChart },
   ];
 
   return (
@@ -38,7 +38,7 @@ export function AppSidebar() {
           </Button>
           <div className="flex flex-col">
             <h2 className="font-headline text-lg font-bold tracking-tight">
-              StoreFlow
+              تدفق المتجر
             </h2>
           </div>
         </div>
@@ -65,7 +65,7 @@ export function AppSidebar() {
             <AvatarFallback>AD</AvatarFallback>
           </Avatar>
           <div className="flex flex-col truncate">
-            <span className="truncate text-sm font-semibold">Admin User</span>
+            <span className="truncate text-sm font-semibold">المسؤول</span>
             <span className="truncate text-xs text-muted-foreground">admin@storeflow.com</span>
           </div>
         </div>
