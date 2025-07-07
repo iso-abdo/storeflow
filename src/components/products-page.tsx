@@ -28,6 +28,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { products as initialProducts } from '@/lib/data';
 import Link from 'next/link';
+import Image from 'next/image';
 
 const productSchema = z.object({
     name: z.string().min(1, { message: "اسم المنتج مطلوب" }),
@@ -181,8 +182,9 @@ export function ProductsPage() {
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead>الرمز</TableHead>
+                                <TableHead className="w-[64px]">الصورة</TableHead>
                                 <TableHead>اسم المنتج</TableHead>
+                                <TableHead>الرمز</TableHead>
                                 <TableHead>الفئة</TableHead>
                                 <TableHead>السعر</TableHead>
                                 <TableHead>أدنى مخزون</TableHead>
@@ -192,12 +194,22 @@ export function ProductsPage() {
                         <TableBody>
                             {products.map((product) => (
                                 <TableRow key={product.id}>
-                                    <TableCell className="font-mono">{product.id}</TableCell>
+                                    <TableCell>
+                                        <Image
+                                            src={product.imageUrl}
+                                            alt={product.name}
+                                            width={40}
+                                            height={40}
+                                            className="rounded-md object-cover aspect-square"
+                                            data-ai-hint="product image"
+                                        />
+                                    </TableCell>
                                     <TableCell className="font-medium">
                                         <Link href={`/products/${product.id}`} className="hover:underline">
                                             {product.name}
                                         </Link>
                                     </TableCell>
+                                    <TableCell className="font-mono">{product.id}</TableCell>
                                     <TableCell>{product.category}</TableCell>
                                     <TableCell>{product.price.toFixed(2)} ج.م</TableCell>
                                     <TableCell className="text-center">{product.min_stock}</TableCell>
