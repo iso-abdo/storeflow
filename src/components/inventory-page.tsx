@@ -77,10 +77,10 @@ const stockTransferSchema = z.object({
 
 
 const initialMovements = [
-    { id: 'mov1', product: 'فأرة لاسلكية', type: 'إدخال', quantity: 50, warehouse: 'المستودع الرئيسي', date: '2023-07-01' },
-    { id: 'mov2', product: 'لوحة مفاتيح ميكانيكية', type: 'إخراج', quantity: 10, warehouse: 'المستودع الرئيسي', date: '2023-07-01' },
-    { id: 'mov3', product: 'شاشة 4K', type: 'تحويل', quantity: 5, warehouse: 'من جدة إلى الدمام', date: '2023-06-30' },
-    { id: 'mov4', product: 'حامل لابتوب', type: 'إدخال', quantity: 100, warehouse: 'المستودع الرئيسي', date: '2023-06-29' },
+    { id: '07010001', product: 'فأرة لاسلكية', type: 'إدخال', quantity: 50, warehouse: 'المستودع الرئيسي', date: '2023-07-01' },
+    { id: '07010002', product: 'لوحة مفاتيح ميكانيكية', type: 'إخراج', quantity: 10, warehouse: 'المستودع الرئيسي', date: '2023-07-01' },
+    { id: '06300001', product: 'شاشة 4K', type: 'تحويل', quantity: 5, warehouse: 'من جدة إلى الدمام', date: '2023-06-30' },
+    { id: '06290001', product: 'حامل لابتوب', type: 'إدخال', quantity: 100, warehouse: 'المستودع الرئيسي', date: '2023-06-29' },
 ];
 
 export function InventoryPage() {
@@ -88,6 +88,9 @@ export function InventoryPage() {
     const [isStockInOpen, setStockInOpen] = useState(false);
     const [isStockOutOpen, setStockOutOpen] = useState(false);
     const [isTransferOpen, setTransferOpen] = useState(false);
+    
+    const [lastIdDate, setLastIdDate] = useState(() => new Date().toISOString().split('T')[0]);
+    const [dailyCounter, setDailyCounter] = useState(1);
 
     const formIn = useForm<z.infer<typeof stockMovementSchema>>({
         resolver: zodResolver(stockMovementSchema),
@@ -102,13 +105,32 @@ export function InventoryPage() {
         defaultValues: { productId: "", quantity: 1, fromWarehouseId: "", toWarehouseId: "" },
     });
 
+    const generateMovementId = () => {
+        const now = new Date();
+        const todayStr = now.toISOString().split('T')[0];
+        
+        let counter = dailyCounter;
+        if (todayStr !== lastIdDate) {
+            counter = 1;
+            setLastIdDate(todayStr);
+        }
+
+        const month = (now.getMonth() + 1).toString().padStart(2, '0');
+        const day = now.getDate().toString().padStart(2, '0');
+        const sequence = counter.toString().padStart(4, '0');
+        
+        setDailyCounter(counter + 1);
+
+        return `${month}${day}${sequence}`;
+    };
+
     function handleStockIn(values: z.infer<typeof stockMovementSchema>) {
         const product = products.find(p => p.id === values.productId);
         const warehouse = warehouses.find(w => w.id === values.warehouseId);
         if (!product || !warehouse) return;
 
         const newMovement = {
-            id: `mov${Date.now()}`,
+            id: generateMovementId(),
             product: product.name,
             type: 'إدخال',
             quantity: values.quantity,
@@ -126,7 +148,7 @@ export function InventoryPage() {
         if (!product || !warehouse) return;
 
         const newMovement = {
-            id: `mov${Date.now()}`,
+            id: generateMovementId(),
             product: product.name,
             type: 'إخراج',
             quantity: values.quantity,
@@ -146,7 +168,7 @@ export function InventoryPage() {
         if (!product || !fromWarehouse || !toWarehouse) return;
         
         const newMovement = {
-            id: `mov${Date.now()}`,
+            id: generateMovementId(),
             product: product.name,
             type: 'تحويل',
             quantity: values.quantity,
@@ -415,13 +437,14 @@ export function InventoryPage() {
         </div>
         <Card>
             <CardHeader>
-            <CardTitle>حركة المخزون</CardTitle>
+            <CardTitle>سجل حركة المخزون</CardTitle>
             <CardDescription>سجل بآخر حركات المخزون المسجلة.</CardDescription>
             </CardHeader>
             <CardContent>
                 <Table>
                     <TableHeader>
                         <TableRow>
+                            <TableHead>رقم الحركة</TableHead>
                             <TableHead>المنتج</TableHead>
                             <TableHead>النوع</TableHead>
                             <TableHead>المستودع/الوجهة</TableHead>
@@ -432,6 +455,7 @@ export function InventoryPage() {
                     <TableBody>
                         {movements.map((mov) => (
                             <TableRow key={mov.id}>
+                                <TableCell className="font-mono">{mov.id}</TableCell>
                                 <TableCell className="font-medium">{mov.product}</TableCell>
                                 <TableCell>
                                     <Badge variant={mov.type === 'إدخال' ? 'default' : mov.type === 'إخراج' ? 'destructive' : 'secondary'}>
