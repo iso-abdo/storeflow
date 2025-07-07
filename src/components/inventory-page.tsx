@@ -77,10 +77,10 @@ const stockTransferSchema = z.object({
 
 
 const initialMovements = [
-    { id: '07010001', product: 'فأرة لاسلكية', type: 'إدخال', quantity: 50, warehouse: 'المستودع الرئيسي', date: '2023-07-01' },
-    { id: '07010002', product: 'لوحة مفاتيح ميكانيكية', type: 'إخراج', quantity: 10, warehouse: 'المستودع الرئيسي', date: '2023-07-01' },
-    { id: '06300001', product: 'شاشة 4K', type: 'تحويل', quantity: 5, warehouse: 'من جدة إلى الدمام', date: '2023-06-30' },
-    { id: '06290001', product: 'حامل لابتوب', type: 'إدخال', quantity: 100, warehouse: 'المستودع الرئيسي', date: '2023-06-29' },
+    { id: '07010001', product: 'فأرة لاسلكية', type: 'إخراج', quantity: 10, warehouse: 'المستودع الرئيسي', date: '2023-07-01' },
+    { id: 'IN-1688199999999', product: 'لوحة مفاتيح ميكانيكية', type: 'إدخال', quantity: 50, warehouse: 'المستودع الرئيسي', date: '2023-07-01' },
+    { id: 'TR-1688100000000', product: 'شاشة 4K', type: 'تحويل', quantity: 5, warehouse: 'من جدة إلى الدمام', date: '2023-06-30' },
+    { id: 'IN-1687900000000', product: 'حامل لابتوب', type: 'إدخال', quantity: 100, warehouse: 'المستودع الرئيسي', date: '2023-06-29' },
 ];
 
 export function InventoryPage() {
@@ -105,7 +105,7 @@ export function InventoryPage() {
         defaultValues: { productId: "", quantity: 1, fromWarehouseId: "", toWarehouseId: "" },
     });
 
-    const generateMovementId = () => {
+    const generateInvoiceId = () => {
         const now = new Date();
         const todayStr = now.toISOString().split('T')[0];
         
@@ -130,7 +130,7 @@ export function InventoryPage() {
         if (!product || !warehouse) return;
 
         const newMovement = {
-            id: generateMovementId(),
+            id: `IN-${Date.now()}`,
             product: product.name,
             type: 'إدخال',
             quantity: values.quantity,
@@ -148,7 +148,7 @@ export function InventoryPage() {
         if (!product || !warehouse) return;
 
         const newMovement = {
-            id: generateMovementId(),
+            id: generateInvoiceId(),
             product: product.name,
             type: 'إخراج',
             quantity: values.quantity,
@@ -168,7 +168,7 @@ export function InventoryPage() {
         if (!product || !fromWarehouse || !toWarehouse) return;
         
         const newMovement = {
-            id: generateMovementId(),
+            id: `TR-${Date.now()}`,
             product: product.name,
             type: 'تحويل',
             quantity: values.quantity,
@@ -444,7 +444,7 @@ export function InventoryPage() {
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead>رقم الحركة</TableHead>
+                            <TableHead>رقم الفاتورة/المرجع</TableHead>
                             <TableHead>المنتج</TableHead>
                             <TableHead>النوع</TableHead>
                             <TableHead>المستودع/الوجهة</TableHead>
