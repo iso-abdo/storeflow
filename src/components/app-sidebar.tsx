@@ -17,47 +17,28 @@ import { Separator } from './ui/separator';
 import Image from 'next/image';
 
 const Logo = () => (
-  <svg
-    width="110"
-    height="60"
-    viewBox="0 0 110 60"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    {/* A.i part, using accent color */}
-    <path
-      d="M31.5,41.4C21.9,39,18.8,26.7,25.3,17.8c6.5-8.9,20.4-9.6,29.3-3.1c11.9,8.5,13.9,26.2,4.8,37.3"
-      stroke="hsl(var(--accent))"
-      strokeWidth="4"
-      strokeLinecap="round"
-      strokeLinejoin="round"
+  <svg width="120" height="60" viewBox="0 0 120 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+    {/* Simple box with arrows symbolizing flow */}
+    <path d="M40 12 H 80 C 81.1046 12 82 12.8954 82 14 V 38 C 82 39.1046 81.1046 40 80 40 H 40 C 38.8954 40 38 39.1046 38 38 V 14 C 38 12.8954 38.8954 12 40 12 Z" 
+        stroke="hsl(var(--sidebar-foreground))" 
+        strokeWidth="2" 
+        fill="hsl(var(--sidebar-background))"
     />
-    <path
-      d="M39,32H61"
-      stroke="hsl(var(--accent))"
-      strokeWidth="4"
-      strokeLinecap="round"
-    />
-    <path
-      d="M87.2,41.9c-2-6.5-8.3-10-15-8.5"
-      stroke="hsl(var(--accent))"
-      strokeWidth="4"
-      strokeLinecap="round"
-    />
-    <circle cx="86" cy="27" r="3" fill="hsl(var(--accent))" />
-    <circle cx="70" cy="42" r="3" fill="hsl(var(--accent))" />
+    <path d="M25 26 H 50" stroke="hsl(var(--accent))" strokeWidth="2.5" strokeLinecap="round"/>
+    <path d="M44 21 L 50 26 L 44 31" stroke="hsl(var(--accent))" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M70 26 H 95" stroke="hsl(var(--accent))" strokeWidth="2.5" strokeLinecap="round"/>
+    <path d="M89 21 L 95 26 L 89 31" stroke="hsl(var(--accent))" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
 
-    {/* StoreFlow text, using muted-foreground */}
     <text
-      x="55"
-      y="55"
-      fontFamily="Tajawal, sans-serif"
-      fontSize="16"
-      fontWeight="bold"
-      fill="hsl(var(--muted-foreground))"
-      textAnchor="middle"
+        x="60"
+        y="56"
+        fontFamily="Tajawal, sans-serif"
+        fontSize="16"
+        fontWeight="bold"
+        fill="hsl(var(--sidebar-foreground))"
+        textAnchor="middle"
     >
-      StoreFlow
+        StoreFlow
     </text>
   </svg>
 );
