@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -12,14 +13,26 @@ import {
 } from "@/components/ui/chart";
 import { Bar, BarChart, CartesianGrid, Line, LineChart, Pie, PieChart, XAxis, YAxis } from "recharts";
 import type { ChartConfig } from "@/components/ui/chart"
+import { Input } from './ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { DatePicker } from './ui/date-picker';
+import { Button } from './ui/button';
 
 // Mock data
-const inventoryData = [
-    { product: 'فأرة لاسلكية', warehouse: 'المستودع الرئيسي', quantity: 75, lowStock: false },
-    { product: 'لوحة مفاتيح ميكانيكية', warehouse: 'المستودع الرئيسي', quantity: 40, lowStock: false },
-    { product: 'شاشة 4K', warehouse: 'مستودع جدة', quantity: 5, lowStock: true },
-    { product: 'حامل لابتوب', warehouse: 'المستودع الرئيسي', quantity: 150, lowStock: false },
-    { product: 'موزع USB-C', warehouse: 'مستودع الدمام', quantity: 18, lowStock: true },
+const inventoryMovementsData = [
+    { product: 'فأرة لاسلكية', warehouse: 'المستودع الرئيسي', quantity: 75, date: '2023-06-01' },
+    { product: 'لوحة مفاتيح ميكانيكية', warehouse: 'المستودع الرئيسي', quantity: 40, date: '2023-06-05' },
+    { product: 'شاشة 4K', warehouse: 'مستودع جدة', quantity: -5, date: '2023-06-10' },
+    { product: 'حامل لابتوب', warehouse: 'المستودع الرئيسي', quantity: 150, date: '2023-06-12' },
+    { product: 'موزع USB-C', warehouse: 'مستودع الدمام', quantity: -18, date: '2023-06-15' },
+    { product: 'فأرة لاسلكية', warehouse: 'مستودع جدة', quantity: -10, date: '2023-06-20' },
+];
+
+const warehouses = [
+    { id: "all", name: "كل المستودعات" },
+    { id: "WH01", name: "المستودع الرئيسي" },
+    { id: "WH02", name: "مستودع جدة" },
+    { id: "WH03", name: "مستودع الدمام" },
 ];
 
 const returnsData = [
@@ -67,14 +80,49 @@ const salesAndPurchasesConfig = {
 
 
 export function ReportsPage() {
+    const [productFilter, setProductFilter] = useState('');
+    const [warehouseFilter, setWarehouseFilter] = useState('كل المستودعات');
+    const [dateFilter, setDateFilter] = useState<Date | undefined>();
+
+    const filteredInventory = inventoryMovementsData.filter(item => {
+        const productMatch = item.product.toLowerCase().includes(productFilter.toLowerCase());
+        const warehouseMatch = warehouseFilter === 'كل المستودعات' || item.warehouse === warehouseFilter;
+        const dateMatch = !dateFilter || new Date(item.date).toDateString() === dateFilter.toDateString();
+        return productMatch && warehouseMatch && dateMatch;
+    });
+
+    const clearFilters = () => {
+        setProductFilter('');
+        setWarehouseFilter('كل المستودعات');
+        setDateFilter(undefined);
+    };
+
   return (
     <div className="flex flex-col gap-6">
         <h1 className="font-headline text-3xl font-bold tracking-tighter">التقارير</h1>
         <div className="grid gap-6 sm:grid-cols-1 lg:grid-cols-2">
             <Card className="lg:col-span-2">
                 <CardHeader>
-                    <CardTitle>تقرير المخزون الحالي</CardTitle>
-                    <CardDescription>عرض شامل لكميات المنتجات وحالة المخزون.</CardDescription>
+                    <CardTitle>تقرير حركة المخزون</CardTitle>
+                    <CardDescription>عرض شامل لحركات المنتجات مع فلاتر للبحث.</CardDescription>
+                    <div className="mt-4 flex flex-wrap items-center gap-2">
+                        <Input 
+                            placeholder="فلترة باسم المنتج..."
+                            value={productFilter}
+                            onChange={(e) => setProductFilter(e.target.value)}
+                            className="max-w-sm"
+                        />
+                        <Select value={warehouseFilter} onValueChange={setWarehouseFilter}>
+                            <SelectTrigger className="w-[200px]">
+                                <SelectValue placeholder="اختر مستودعاً" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {warehouses.map(w => <SelectItem key={w.id} value={w.name}>{w.name}</SelectItem>)}
+                            </SelectContent>
+                        </Select>
+                        <DatePicker date={dateFilter} setDate={setDateFilter} />
+                        <Button variant="ghost" onClick={clearFilters}>مسح الفلاتر</Button>
+                    </div>
                 </CardHeader>
                 <CardContent>
                     <Table>
@@ -82,22 +130,24 @@ export function ReportsPage() {
                             <TableRow>
                                 <TableHead>المنتج</TableHead>
                                 <TableHead>المستودع</TableHead>
-                                <TableHead className="text-center">الحالة</TableHead>
+                                <TableHead>النوع</TableHead>
+                                <TableHead>التاريخ</TableHead>
                                 <TableHead className="text-right">الكمية</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {inventoryData.map((item) => (
-                                <TableRow key={item.product}>
+                            {filteredInventory.map((item, index) => (
+                                <TableRow key={`${item.product}-${index}`}>
                                     <TableCell className="font-medium">{item.product}</TableCell>
                                     <TableCell>{item.warehouse}</TableCell>
-                                    <TableCell className="text-center">
-                                        {item.lowStock ? (
-                                            <Badge variant="destructive">منخفض</Badge>
+                                    <TableCell>
+                                        {item.quantity > 0 ? (
+                                            <Badge variant="default">إدخال</Badge>
                                         ) : (
-                                            <Badge variant="secondary">متوفر</Badge>
+                                            <Badge variant="destructive">إخراج</Badge>
                                         )}
                                     </TableCell>
+                                    <TableCell>{new Date(item.date).toLocaleDateString('ar-EG')}</TableCell>
                                     <TableCell className="text-right font-mono">{item.quantity}</TableCell>
                                 </TableRow>
                             ))}
