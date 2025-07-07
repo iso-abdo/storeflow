@@ -10,7 +10,7 @@ import {
   ChartLegend,
   ChartLegendContent,
 } from "@/components/ui/chart";
-import { Bar, BarChart, CartesianGrid, Line, LineChart, Pie, PieChart } from "recharts";
+import { Bar, BarChart, CartesianGrid, Line, LineChart, Pie, PieChart, XAxis, YAxis } from "recharts";
 import type { ChartConfig } from "@/components/ui/chart"
 
 // Mock data
