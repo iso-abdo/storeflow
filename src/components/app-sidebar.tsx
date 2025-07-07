@@ -24,12 +24,12 @@ const Logo = () => (
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
-        <path d="M22.8,32.1c-3.1-6.2,1.9-15.8,13-16.1c11.1-0.3,16.8,9.4,13.4,16.9c-3.4,7.5-15.7,6.5-19.8-0.1Z" stroke="#F0635A" strokeWidth="2" strokeLinecap="round"/>
-        <path d="M30,25H46" stroke="#F0635A" strokeWidth="2" strokeLinecap="round"/>
-        <path d="M59,32V24" stroke="#F0635A" strokeWidth="2" strokeLinecap="round"/>
-        <circle cx="59" cy="20.5" r="1.2" stroke="#F0635A" strokeWidth="1.2"/>
-        <circle cx="52.5" cy="32.5" r="1.2" fill="#F0635A"/>
-        <text x="55" y="42" fontFamily="Tajawal, sans-serif" fontSize="14" fontWeight="bold" fill="#70657F" textAnchor="middle">
+        <path d="M22.8,32.1c-3.1-6.2,1.9-15.8,13-16.1c11.1-0.3,16.8,9.4,13.4,16.9c-3.4,7.5-15.7,6.5-19.8-0.1Z" stroke="hsl(var(--accent))" strokeWidth="2" strokeLinecap="round"/>
+        <path d="M30,25H46" stroke="hsl(var(--accent))" strokeWidth="2" strokeLinecap="round"/>
+        <path d="M59,32V24" stroke="hsl(var(--accent))" strokeWidth="2" strokeLinecap="round"/>
+        <circle cx="59" cy="20.5" r="1.2" stroke="hsl(var(--accent))" strokeWidth="1.2"/>
+        <circle cx="52.5" cy="32.5" r="1.2" fill="hsl(var(--accent))"/>
+        <text x="55" y="38" fontFamily="Tajawal, sans-serif" fontSize="14" fontWeight="bold" fill="currentColor" textAnchor="middle">
             StoreFlow
         </text>
     </svg>
