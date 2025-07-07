@@ -57,12 +57,17 @@ const warehouses = [
     { id: "WH03", name: "مستودع الدمام" },
 ];
 
+// Schema for simple stock in/out
 const stockMovementSchema = z.object({
     productId: z.string().min(1, { message: "الرجاء اختيار منتج" }),
+    warehouseId: z.string().min(1, { message: "الرجاء اختيار المستودع" }),
     quantity: z.coerce.number().int().min(1, { message: "الكمية يجب أن تكون 1 على الأقل" }),
 });
 
-const stockTransferSchema = stockMovementSchema.extend({
+// Schema for stock transfer
+const stockTransferSchema = z.object({
+    productId: z.string().min(1, { message: "الرجاء اختيار منتج" }),
+    quantity: z.coerce.number().int().min(1, { message: "الكمية يجب أن تكون 1 على الأقل" }),
     fromWarehouseId: z.string().min(1, { message: "الرجاء اختيار المستودع المصدر" }),
     toWarehouseId: z.string().min(1, { message: "الرجاء اختيار المستودع الهدف" }),
 }).refine(data => data.fromWarehouseId !== data.toWarehouseId, {
@@ -86,11 +91,11 @@ export function InventoryPage() {
 
     const formIn = useForm<z.infer<typeof stockMovementSchema>>({
         resolver: zodResolver(stockMovementSchema),
-        defaultValues: { productId: "", quantity: 1 },
+        defaultValues: { productId: "", warehouseId: "", quantity: 1 },
     });
     const formOut = useForm<z.infer<typeof stockMovementSchema>>({
         resolver: zodResolver(stockMovementSchema),
-        defaultValues: { productId: "", quantity: 1 },
+        defaultValues: { productId: "", warehouseId: "", quantity: 1 },
     });
     const formTransfer = useForm<z.infer<typeof stockTransferSchema>>({
         resolver: zodResolver(stockTransferSchema),
@@ -98,20 +103,58 @@ export function InventoryPage() {
     });
 
     function handleStockIn(values: z.infer<typeof stockMovementSchema>) {
-        console.log("Stock In:", values);
-        // Logic to add movement will go here
+        const product = products.find(p => p.id === values.productId);
+        const warehouse = warehouses.find(w => w.id === values.warehouseId);
+        if (!product || !warehouse) return;
+
+        const newMovement = {
+            id: `mov${Date.now()}`,
+            product: product.name,
+            type: 'إدخال',
+            quantity: values.quantity,
+            warehouse: warehouse.name,
+            date: new Date().toISOString().split('T')[0],
+        };
+
+        setMovements(prevMovements => [newMovement, ...prevMovements]);
         setStockInOpen(false);
         formIn.reset();
     }
     function handleStockOut(values: z.infer<typeof stockMovementSchema>) {
-        console.log("Stock Out:", values);
-        // Logic to add movement will go here
+        const product = products.find(p => p.id === values.productId);
+        const warehouse = warehouses.find(w => w.id === values.warehouseId);
+        if (!product || !warehouse) return;
+
+        const newMovement = {
+            id: `mov${Date.now()}`,
+            product: product.name,
+            type: 'إخراج',
+            quantity: values.quantity,
+            warehouse: warehouse.name,
+            date: new Date().toISOString().split('T')[0],
+        };
+
+        setMovements(prevMovements => [newMovement, ...prevMovements]);
         setStockOutOpen(false);
         formOut.reset();
     }
     function handleTransfer(values: z.infer<typeof stockTransferSchema>) {
-        console.log("Transfer:", values);
-        // Logic to add movement will go here
+        const product = products.find(p => p.id === values.productId);
+        const fromWarehouse = warehouses.find(w => w.id === values.fromWarehouseId);
+        const toWarehouse = warehouses.find(w => w.id === values.toWarehouseId);
+
+        if (!product || !fromWarehouse || !toWarehouse) return;
+        
+        const newMovement = {
+            id: `mov${Date.now()}`,
+            product: product.name,
+            type: 'تحويل',
+            quantity: values.quantity,
+            warehouse: `من ${fromWarehouse.name} إلى ${toWarehouse.name}`,
+            date: new Date().toISOString().split('T')[0],
+        };
+
+        setMovements(prevMovements => [newMovement, ...prevMovements]);
         setTransferOpen(false);
         formTransfer.reset();
     }
@@ -132,7 +175,7 @@ export function InventoryPage() {
                     <DialogContent>
                         <DialogHeader>
                             <DialogTitle>إدخال مخزون جديد</DialogTitle>
-                            <DialogDescription>اختر المنتج والكمية المدخلة.</DialogDescription>
+                            <DialogDescription>اختر المنتج والمستودع والكمية المدخلة.</DialogDescription>
                         </DialogHeader>
                         <Form {...formIn}>
                             <form onSubmit={formIn.handleSubmit(handleStockIn)} className="space-y-4">
@@ -150,6 +193,26 @@ export function InventoryPage() {
                                                 </FormControl>
                                                 <SelectContent>
                                                     {products.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+                                                </SelectContent>
+                                            </Select>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={formIn.control}
+                                    name="warehouseId"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>المستودع</FormLabel>
+                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                <FormControl>
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="اختر مستودعاً" />
+                                                    </SelectTrigger>
+                                                </FormControl>
+                                                <SelectContent>
+                                                    {warehouses.map(w => <SelectItem key={w.id} value={w.id}>{w.name}</SelectItem>)}
                                                 </SelectContent>
                                             </Select>
                                             <FormMessage />
@@ -188,7 +251,7 @@ export function InventoryPage() {
                     <DialogContent>
                         <DialogHeader>
                             <DialogTitle>إخراج مخزون</DialogTitle>
-                            <DialogDescription>اختر المنتج والكمية المخرجة.</DialogDescription>
+                            <DialogDescription>اختر المنتج والمستودع والكمية المخرجة.</DialogDescription>
                         </DialogHeader>
                         <Form {...formOut}>
                             <form onSubmit={formOut.handleSubmit(handleStockOut)} className="space-y-4">
@@ -206,6 +269,26 @@ export function InventoryPage() {
                                                 </FormControl>
                                                 <SelectContent>
                                                     {products.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+                                                </SelectContent>
+                                            </Select>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={formOut.control}
+                                    name="warehouseId"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>المستودع</FormLabel>
+                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                <FormControl>
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="اختر مستودعاً" />
+                                                    </SelectTrigger>
+                                                </FormControl>
+                                                <SelectContent>
+                                                    {warehouses.map(w => <SelectItem key={w.id} value={w.id}>{w.name}</SelectItem>)}
                                                 </SelectContent>
                                             </Select>
                                             <FormMessage />
