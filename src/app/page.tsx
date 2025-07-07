@@ -6,7 +6,7 @@ import { Sidebar, SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 export default function Home() {
   return (
     <SidebarProvider>
-      <Sidebar>
+      <Sidebar side="right">
         <AppSidebar />
       </Sidebar>
       <SidebarInset>
