@@ -18,16 +18,24 @@ import Image from 'next/image';
 
 const Logo = () => (
   <svg width="120" height="60" viewBox="0 0 120 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-    {/* Simple box with arrows symbolizing flow */}
+    {/* Box with A.i inside */}
     <path d="M40 12 H 80 C 81.1046 12 82 12.8954 82 14 V 38 C 82 39.1046 81.1046 40 80 40 H 40 C 38.8954 40 38 39.1046 38 38 V 14 C 38 12.8954 38.8954 12 40 12 Z" 
         stroke="hsl(var(--sidebar-foreground))" 
         strokeWidth="2" 
         fill="hsl(var(--sidebar-background))"
     />
-    <path d="M25 26 H 50" stroke="hsl(var(--accent))" strokeWidth="2.5" strokeLinecap="round"/>
-    <path d="M44 21 L 50 26 L 44 31" stroke="hsl(var(--accent))" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M70 26 H 95" stroke="hsl(var(--accent))" strokeWidth="2.5" strokeLinecap="round"/>
-    <path d="M89 21 L 95 26 L 89 31" stroke="hsl(var(--accent))" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+    <text
+        x="60"
+        y="26"
+        fontFamily="Tajawal, sans-serif"
+        fontSize="14"
+        fontWeight="bold"
+        fill="hsl(var(--accent))"
+        textAnchor="middle"
+        dominantBaseline="middle"
+    >
+        A.i
+    </text>
 
     <text
         x="60"
