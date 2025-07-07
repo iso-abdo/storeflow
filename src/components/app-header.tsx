@@ -17,21 +17,13 @@ import React from 'react';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from './ui/command';
 import { useRouter } from 'next/navigation';
+import { products } from '@/lib/data';
 
 
 const notifications = [
     { type: 'low_stock', product: 'لوحة مفاتيح ميكانيكية' },
     { type: 'pending_return', product: 'شاشة 4K' },
     { type: 'low_stock', product: 'فأرة لاسلكية' },
-];
-
-// Mock data for search functionality
-const products = [
-    { id: "PROD001", name: "فأرة لاسلكية" },
-    { id: "PROD002", name: "لوحة مفاتيح ميكانيكية" },
-    { id: "PROD003", name: "شاشة 4K" },
-    { id: "PROD004", name: "حامل لابتوب" },
-    { id: "PROD005", name: "موزع USB-C" },
 ];
 
 
@@ -58,7 +50,7 @@ export function AppHeader() {
   const handleSelect = (productId: string) => {
     setOpen(false);
     setSearch("");
-    router.push('/products');
+    router.push(`/products/${productId}`);
   };
 
   return (

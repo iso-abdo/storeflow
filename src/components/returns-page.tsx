@@ -41,15 +41,8 @@ import {
     TableRow,
   } from "@/components/ui/table";
 import { Badge } from './ui/badge';
+import { products, returns as initialReturns } from '@/lib/data';
 
-// Mock data, should be fetched from a central place later
-const products = [
-    { id: "PROD001", name: "فأرة لاسلكية" },
-    { id: "PROD002", name: "لوحة مفاتيح ميكانيكية" },
-    { id: "PROD003", name: "شاشة 4K" },
-    { id: "PROD004", name: "حامل لابتوب" },
-    { id: "PROD005", name: "موزع USB-C" },
-];
 
 const returnSchema = z.object({
     invoiceId: z.string().min(1, { message: "رقم الفاتورة الأصلية مطلوب" }),
@@ -58,11 +51,6 @@ const returnSchema = z.object({
     reason: z.string().min(1, { message: "الرجاء اختيار سبب الإرجاع" }),
 });
 
-const initialReturns = [
-    { id: 'RET001', invoiceId: 'INV2023-101', product: 'شاشة 4K', quantity: 1, reason: 'تالف', status: 'قيد الانتظار', date: '2023-06-25' },
-    { id: 'RET002', invoiceId: 'INV2023-102', product: 'فأرة لاسلكية', quantity: 2, reason: 'منتج خاطئ', status: 'تمت الموافقة', date: '2023-06-24' },
-    { id: 'RET003', invoiceId: 'INV2023-103', product: 'موزع USB-C', quantity: 1, reason: 'أخرى', status: 'مرفوض', date: '2023-06-22' },
-];
 
 export function ReturnsPage() {
     const [returns, setReturns] = useState(initialReturns);

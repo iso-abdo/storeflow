@@ -26,6 +26,8 @@ import {
     FormMessage,
   } from "@/components/ui/form"
 import { Input } from "@/components/ui/input";
+import { products as initialProducts } from '@/lib/data';
+import Link from 'next/link';
 
 const productSchema = z.object({
     name: z.string().min(1, { message: "اسم المنتج مطلوب" }),
@@ -36,13 +38,6 @@ const productSchema = z.object({
     stock: z.coerce.number().int().min(0).optional(),
 });
 
-const initialProducts = [
-    { id: "PROD001", name: "فأرة لاسلكية", barcode: "1234567890123", category: "إلكترونيات", price: 75.00, min_stock: 10, stock: 120 },
-    { id: "PROD002", name: "لوحة مفاتيح ميكانيكية", barcode: "2345678901234", category: "إلكترونيات", price: 250.00, min_stock: 15, stock: 80 },
-    { id: "PROD003", name: "شاشة 4K", barcode: "3456789012345", category: "شاشات", price: 1500.00, min_stock: 5, stock: 30 },
-    { id: "PROD004", name: "حامل لابتوب", barcode: "4567890123456", category: "ملحقات", price: 120.00, min_stock: 20, stock: 200 },
-    { id: "PROD005", name: "موزع USB-C", barcode: "5678901234567", category: "ملحقات", price: 90.00, min_stock: 25, stock: 150 },
-];
 
 export function ProductsPage() {
     const [products, setProducts] = useState(initialProducts);
@@ -63,6 +58,7 @@ export function ProductsPage() {
     function onSubmit(values: z.infer<typeof productSchema>) {
         const newProduct = {
             id: `PROD${(products.length + 1).toString().padStart(3, '0')}`,
+            imageUrl: "https://placehold.co/400x400.png",
             ...values,
         };
         setProducts([...products, newProduct]);
@@ -197,7 +193,11 @@ export function ProductsPage() {
                             {products.map((product) => (
                                 <TableRow key={product.id}>
                                     <TableCell className="font-mono">{product.id}</TableCell>
-                                    <TableCell className="font-medium">{product.name}</TableCell>
+                                    <TableCell className="font-medium">
+                                        <Link href={`/products/${product.id}`} className="hover:underline">
+                                            {product.name}
+                                        </Link>
+                                    </TableCell>
                                     <TableCell>{product.category}</TableCell>
                                     <TableCell>{product.price.toFixed(2)} ج.م</TableCell>
                                     <TableCell className="text-center">{product.min_stock}</TableCell>

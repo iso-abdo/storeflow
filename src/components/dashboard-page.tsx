@@ -35,48 +35,13 @@ import {
   } from "@/components/ui/dialog";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
+import { chartData, products as initialProducts, warehouses as initialWarehouses, recentActivities, returns as pendingReturns } from "@/lib/data";
 
-
-const chartData = [
-  { month: "يناير", in: 186, out: 80 },
-  { month: "فبراير", in: 305, out: 200 },
-  { month: "مارس", in: 237, out: 120 },
-  { month: "أبريل", in: 73, out: 190 },
-  { month: "مايو", in: 209, out: 130 },
-  { month: "يونيو", in: 214, out: 140 },
-]
 
 const chartConfig = {
   in: { label: 'مخزون وارد', color: 'hsl(var(--chart-2))' },
   out: { label: 'مخزون صادر', color: 'hsl(var(--destructive))' },
 }
-
-const recentActivities = [
-    { id: 't1', product: 'فأرة لاسلكية', type: 'بيع', quantity: 10, date: '2023-06-23', status: 'مكتمل' },
-    { id: 't2', product: 'لوحة مفاتيح ميكانيكية', type: 'إدخال مخزون', quantity: 25, date: '2023-06-22', status: 'تم الاستلام' },
-    { id: 't3', product: 'موزع USB-C', type: 'مرتجع', quantity: 2, date: '2023-06-21', status: 'قيد الانتظار' },
-    { id: 't4', product: 'شاشة 4K', type: 'تحويل', quantity: 5, date: '2023-06-20', status: 'تم الشحن' },
-    { id: 't5', product: 'حامل لابتوب', type: 'بيع', quantity: 15, date: '2023-06-19', status: 'مكتمل' },
-]
-
-const initialProducts = [
-    { id: "PROD001", name: "فأرة لاسلكية", stock: 120, min_stock: 10 },
-    { id: "PROD002", name: "لوحة مفاتيح ميكانيكية", stock: 12, min_stock: 15 },
-    { id: "PROD003", name: "شاشة 4K", stock: 5, min_stock: 5 },
-    { id: "PROD004", name: "حامل لابتوب", stock: 200, min_stock: 20 },
-    { id: "PROD005", name: "موزع USB-C", stock: 150, min_stock: 25 },
-];
-
-const initialWarehouses = [
-    { id: "WH01", name: "المستودع الرئيسي" },
-    { id: "WH02", name: "مستودع جدة" },
-    { id: "WH03", name: "مستودع الدمام" },
-];
-
-const pendingReturns = [
-    { id: 'RET001', invoiceId: 'INV2023-101', product: 'شاشة 4K', quantity: 1, reason: 'تالف', date: '2023-06-25' },
-    { id: 'RET004', invoiceId: 'INV2023-108', product: 'لوحة مفاتيح ميكانيكية', quantity: 1, reason: 'منتج خاطئ', date: '2023-06-28' },
-];
 
 const lowStockProducts = initialProducts.filter(p => p.stock <= p.min_stock);
 

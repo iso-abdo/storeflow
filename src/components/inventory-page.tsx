@@ -41,21 +41,8 @@ import {
     TableRow,
   } from "@/components/ui/table";
 import { Badge } from './ui/badge';
+import { products, warehouses, movements as initialMovements } from '@/lib/data';
 
-// Mock data, same as products page for now
-const products = [
-    { id: "PROD001", name: "فأرة لاسلكية" },
-    { id: "PROD002", name: "لوحة مفاتيح ميكانيكية" },
-    { id: "PROD003", name: "شاشة 4K" },
-    { id: "PROD004", name: "حامل لابتوب" },
-    { id: "PROD005", name: "موزع USB-C" },
-];
-
-const warehouses = [
-    { id: "WH01", name: "المستودع الرئيسي" },
-    { id: "WH02", name: "مستودع جدة" },
-    { id: "WH03", name: "مستودع الدمام" },
-];
 
 // Schema for simple stock in/out
 const stockMovementSchema = z.object({
@@ -75,13 +62,6 @@ const stockTransferSchema = z.object({
     path: ["toWarehouseId"],
 });
 
-
-const initialMovements = [
-    { id: '07010001', product: 'فأرة لاسلكية', type: 'إخراج', quantity: 10, warehouse: 'المستودع الرئيسي', date: '2023-07-01' },
-    { id: '07010002', product: 'لوحة مفاتيح ميكانيكية', type: 'إدخال', quantity: 50, warehouse: 'المستودع الرئيسي', date: '2023-07-01' },
-    { id: '06300001', product: 'شاشة 4K', type: 'تحويل', quantity: 5, warehouse: 'من جدة إلى الدمام', date: '2023-06-30' },
-    { id: '06290001', product: 'حامل لابتوب', type: 'إدخال', quantity: 100, warehouse: 'المستودع الرئيسي', date: '2023-06-29' },
-];
 
 export function InventoryPage() {
     const [movements, setMovements] = useState(initialMovements);

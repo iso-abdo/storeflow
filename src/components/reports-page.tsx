@@ -20,20 +20,12 @@ import { Check, ChevronsUpDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from './ui/command';
+import { products, inventoryMovementsData, returnsData, salesAndPurchasesData } from '@/lib/data';
 
 // Mock data
-const inventoryMovementsData = [
-    { product: 'فأرة لاسلكية', warehouse: 'المستودع الرئيسي', quantity: 75, date: '2023-06-01' },
-    { product: 'لوحة مفاتيح ميكانيكية', warehouse: 'المستودع الرئيسي', quantity: 40, date: '2023-06-05' },
-    { product: 'شاشة 4K', warehouse: 'مستودع جدة', quantity: -5, date: '2023-06-10' },
-    { product: 'حامل لابتوب', warehouse: 'المستودع الرئيسي', quantity: 150, date: '2023-06-12' },
-    { product: 'موزع USB-C', warehouse: 'مستودع الدمام', quantity: -18, date: '2023-06-15' },
-    { product: 'فأرة لاسلكية', warehouse: 'مستودع جدة', quantity: -10, date: '2023-06-20' },
-];
-
-const productsForFilter = [...new Set(inventoryMovementsData.map(item => item.product))].map(productName => ({
-    value: productName.toLowerCase(),
-    label: productName
+const productsForFilter = products.map(p => ({
+    value: p.name.toLowerCase(),
+    label: p.name
 }));
 
 const warehouses = [
@@ -43,12 +35,6 @@ const warehouses = [
     { id: "WH03", name: "مستودع الدمام" },
 ];
 
-const returnsData = [
-    { reason: 'damaged', count: 12 },
-    { reason: 'wrong_item', count: 7 },
-    { reason: 'other_reason', count: 5 },
-    { reason: 'other', count: 9 },
-];
 
 const returnsConfig = {
   count: {
@@ -71,15 +57,6 @@ const returnsConfig = {
     color: "hsl(var(--chart-2))",
   },
 } satisfies ChartConfig
-
-const salesAndPurchasesData = [
-    { month: "يناير", sales: 4000, purchases: 2500 },
-    { month: "فبراير", sales: 3000, purchases: 3200 },
-    { month: "مارس", sales: 5000, purchases: 2800 },
-    { month: "أبريل", sales: 4500, purchases: 4100 },
-    { month: "مايو", sales: 6000, purchases: 3500 },
-    { month: "يونيو", sales: 5500, purchases: 4500 },
-];
 
 const salesAndPurchasesConfig = {
   sales: { label: 'المبيعات (ر.س)', color: 'hsl(var(--chart-2))' },
