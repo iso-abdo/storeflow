@@ -13,6 +13,11 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import Image from 'next/image';
+import React from 'react';
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
+import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from './ui/command';
+import { useRouter } from 'next/navigation';
+
 
 const notifications = [
     { type: 'low_stock', product: 'لوحة مفاتيح ميكانيكية' },
@@ -20,19 +25,86 @@ const notifications = [
     { type: 'low_stock', product: 'فأرة لاسلكية' },
 ];
 
+// Mock data for search functionality
+const products = [
+    { id: "PROD001", name: "فأرة لاسلكية" },
+    { id: "PROD002", name: "لوحة مفاتيح ميكانيكية" },
+    { id: "PROD003", name: "شاشة 4K" },
+    { id: "PROD004", name: "حامل لابتوب" },
+    { id: "PROD005", name: "موزع USB-C" },
+];
+
+
 export function AppHeader() {
+  const [open, setOpen] = React.useState(false);
+  const [search, setSearch] = React.useState("");
+  const router = useRouter();
+
+  const filteredProducts = search
+    ? products.filter((product) =>
+        product.name.toLowerCase().includes(search.toLowerCase())
+      )
+    : [];
+
+  React.useEffect(() => {
+    if (search.length > 0 && filteredProducts.length > 0) {
+      setOpen(true);
+    } else {
+      setOpen(false);
+    }
+  }, [search, filteredProducts.length]);
+
+
+  const handleSelect = (productId: string) => {
+    setOpen(false);
+    setSearch("");
+    router.push('/products');
+  };
+
   return (
-    <header className="sticky top-0 z-10 flex h-14 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm lg:h-[60px] lg:px-6">
+    <header className="sticky top-0 z-20 flex h-14 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm lg:h-[60px] lg:px-6">
       <SidebarTrigger className="md:hidden" />
       <div className="w-full flex-1">
-        <form>
-          <div className="relative">
-            <Search className="absolute right-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="ابحث في المنتجات..."
-              className="w-full appearance-none bg-transparent pr-8 shadow-none md:w-2/3 lg:w-1/3"
-            />
+        <form onSubmit={(e) => e.preventDefault()}>
+          <div className="relative md:w-2/3 lg:w-1/3">
+            <Popover open={open} onOpenChange={setOpen}>
+              <PopoverTrigger asChild>
+                <div className="relative w-full">
+                  <Search className="absolute right-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    type="search"
+                    placeholder="ابحث في المنتجات..."
+                    className="w-full appearance-none bg-transparent pr-8 shadow-none"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                  />
+                </div>
+              </PopoverTrigger>
+              <PopoverContent 
+                className="p-0"
+                style={{ width: 'var(--radix-popover-trigger-width)' }}
+                align="start"
+                onOpenAutoFocus={(e) => e.preventDefault()}
+              >
+                <Command shouldFilter={false}>
+                  <CommandList>
+                    <CommandEmpty>لا يوجد نتائج.</CommandEmpty>
+                    <CommandGroup>
+                      {filteredProducts.map((product) => (
+                        <CommandItem
+                          key={product.id}
+                          value={product.name}
+                          onSelect={() => handleSelect(product.id)}
+                          className='cursor-pointer'
+                        >
+                          {product.name}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
           </div>
         </form>
       </div>
