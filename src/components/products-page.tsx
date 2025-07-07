@@ -29,11 +29,11 @@ import { Input } from "@/components/ui/input";
 
 const productSchema = z.object({
     name: z.string().min(1, { message: "اسم المنتج مطلوب" }),
-    barcode: z.string().min(1, { message: "الباركود مطلوب" }),
-    category: z.string().min(1, { message: "الفئة مطلوبة" }),
-    price: z.coerce.number().min(0, { message: "السعر يجب أن يكون رقمًا موجبًا" }),
-    min_stock: z.coerce.number().int().min(0, { message: "الحد الأدنى للمخزون يجب أن يكون رقمًا صحيحًا موجبًا" }),
-    stock: z.coerce.number().int().min(0, { message: "المخزون الحالي يجب أن يكون رقمًا صحيحًا موجبًا" }),
+    barcode: z.string().optional(),
+    category: z.string().optional(),
+    price: z.coerce.number().min(0.01, { message: "السعر مطلوب ويجب أن يكون رقماً موجباً" }),
+    min_stock: z.coerce.number().int().min(0).optional(),
+    stock: z.coerce.number().int().min(0).optional(),
 });
 
 const initialProducts = [
