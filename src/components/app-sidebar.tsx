@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { AreaChart, Boxes, LayoutDashboard, Package, Warehouse, Undo2 } from 'lucide-react';
+import { AreaChart, Boxes, LayoutDashboard, Warehouse, Undo2 } from 'lucide-react';
 
 import {
   SidebarHeader,
@@ -13,9 +13,28 @@ import {
   SidebarMenuButton,
 } from '@/components/ui/sidebar';
 import { Avatar, AvatarFallback } from './ui/avatar';
-import { Button } from './ui/button';
 import { Separator } from './ui/separator';
 import Image from 'next/image';
+
+const Logo = () => (
+    <svg
+      width="110"
+      height="44"
+      viewBox="0 0 110 44"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+        <path d="M22.8,32.1c-3.1-6.2,1.9-15.8,13-16.1c11.1-0.3,16.8,9.4,13.4,16.9c-3.4,7.5-15.7,6.5-19.8-0.1Z" stroke="#F0635A" strokeWidth="2" strokeLinecap="round"/>
+        <path d="M30,25H46" stroke="#F0635A" strokeWidth="2" strokeLinecap="round"/>
+        <path d="M59,32V24" stroke="#F0635A" strokeWidth="2" strokeLinecap="round"/>
+        <circle cx="59" cy="20.5" r="1.2" stroke="#F0635A" strokeWidth="1.2"/>
+        <circle cx="52.5" cy="32.5" r="1.2" fill="#F0635A"/>
+        <text x="55" y="42" fontFamily="Tajawal, sans-serif" fontSize="14" fontWeight="bold" fill="#70657F" textAnchor="middle">
+            StoreFlow
+        </text>
+    </svg>
+);
+
 
 export function AppSidebar() {
   const pathname = usePathname();
@@ -32,15 +51,8 @@ export function AppSidebar() {
   return (
     <>
       <SidebarHeader>
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" className="h-10 w-10 text-primary hover:bg-primary/10">
-            <Package className="h-6 w-6" />
-          </Button>
-          <div className="flex flex-col">
-            <h2 className="font-headline text-lg font-bold tracking-tight">
-              تدفق المتجر
-            </h2>
-          </div>
+        <div className="flex items-center justify-center p-2">
+           <Logo />
         </div>
       </SidebarHeader>
       <SidebarContent>
