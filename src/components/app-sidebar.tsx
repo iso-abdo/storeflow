@@ -17,22 +17,49 @@ import { Separator } from './ui/separator';
 import Image from 'next/image';
 
 const Logo = () => (
-    <svg
-      width="110"
-      height="44"
-      viewBox="0 0 110 44"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
+  <svg
+    width="110"
+    height="60"
+    viewBox="0 0 110 60"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    {/* A.i part, using accent color */}
+    <path
+      d="M31.5,41.4C21.9,39,18.8,26.7,25.3,17.8c6.5-8.9,20.4-9.6,29.3-3.1c11.9,8.5,13.9,26.2,4.8,37.3"
+      stroke="hsl(var(--accent))"
+      strokeWidth="4"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M39,32H61"
+      stroke="hsl(var(--accent))"
+      strokeWidth="4"
+      strokeLinecap="round"
+    />
+    <path
+      d="M87.2,41.9c-2-6.5-8.3-10-15-8.5"
+      stroke="hsl(var(--accent))"
+      strokeWidth="4"
+      strokeLinecap="round"
+    />
+    <circle cx="86" cy="27" r="3" fill="hsl(var(--accent))" />
+    <circle cx="70" cy="42" r="3" fill="hsl(var(--accent))" />
+
+    {/* StoreFlow text, using muted-foreground */}
+    <text
+      x="55"
+      y="55"
+      fontFamily="Tajawal, sans-serif"
+      fontSize="16"
+      fontWeight="bold"
+      fill="hsl(var(--muted-foreground))"
+      textAnchor="middle"
     >
-        <path d="M22.8,32.1c-3.1-6.2,1.9-15.8,13-16.1c11.1-0.3,16.8,9.4,13.4,16.9c-3.4,7.5-15.7,6.5-19.8-0.1Z" stroke="hsl(var(--accent))" strokeWidth="2" strokeLinecap="round"/>
-        <path d="M30,25H46" stroke="hsl(var(--accent))" strokeWidth="2" strokeLinecap="round"/>
-        <path d="M59,32V24" stroke="hsl(var(--accent))" strokeWidth="2" strokeLinecap="round"/>
-        <circle cx="59" cy="20.5" r="1.2" stroke="hsl(var(--accent))" strokeWidth="1.2"/>
-        <circle cx="52.5" cy="32.5" r="1.2" fill="hsl(var(--accent))"/>
-        <text x="55" y="38" fontFamily="Tajawal, sans-serif" fontSize="14" fontWeight="bold" fill="currentColor" textAnchor="middle">
-            StoreFlow
-        </text>
-    </svg>
+      StoreFlow
+    </text>
+  </svg>
 );
 
 
