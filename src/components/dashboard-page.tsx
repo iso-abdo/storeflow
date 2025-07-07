@@ -60,11 +60,11 @@ const recentActivities = [
 ]
 
 const initialProducts = [
-    { id: "PROD001", name: "فأرة لاسلكية", stock: 120 },
-    { id: "PROD002", name: "لوحة مفاتيح ميكانيكية", stock: 80 },
-    { id: "PROD003", name: "شاشة 4K", stock: 30 },
-    { id: "PROD004", name: "حامل لابتوب", stock: 200 },
-    { id: "PROD005", name: "موزع USB-C", stock: 150 },
+    { id: "PROD001", name: "فأرة لاسلكية", stock: 120, min_stock: 10 },
+    { id: "PROD002", name: "لوحة مفاتيح ميكانيكية", stock: 12, min_stock: 15 },
+    { id: "PROD003", name: "شاشة 4K", stock: 5, min_stock: 5 },
+    { id: "PROD004", name: "حامل لابتوب", stock: 200, min_stock: 20 },
+    { id: "PROD005", name: "موزع USB-C", stock: 150, min_stock: 25 },
 ];
 
 const initialWarehouses = [
@@ -73,11 +73,21 @@ const initialWarehouses = [
     { id: "WH03", name: "مستودع الدمام" },
 ];
 
+const pendingReturns = [
+    { id: 'RET001', invoiceId: 'INV2023-101', product: 'شاشة 4K', quantity: 1, reason: 'تالف', date: '2023-06-25' },
+    { id: 'RET004', invoiceId: 'INV2023-108', product: 'لوحة مفاتيح ميكانيكية', quantity: 1, reason: 'منتج خاطئ', date: '2023-06-28' },
+];
+
+const lowStockProducts = initialProducts.filter(p => p.stock <= p.min_stock);
+
+
 export function DashboardPage() {
     const [products] = useState(initialProducts);
     const [warehouses, setWarehouses] = useState(initialWarehouses);
     const [isProductsDialogOpen, setProductsDialogOpen] = useState(false);
     const [isWarehousesDialogOpen, setWarehousesDialogOpen] = useState(false);
+    const [isReturnsDialogOpen, setReturnsDialogOpen] = useState(false);
+    const [isLowStockDialogOpen, setLowStockDialogOpen] = useState(false);
     
     const [newWarehouseName, setNewWarehouseName] = useState('');
     const [editingWarehouse, setEditingWarehouse] = useState<{id: string; name: string} | null>(null);
@@ -216,26 +226,95 @@ export function DashboardPage() {
             </DialogContent>
         </Dialog>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">مرتجعات معلقة</CardTitle>
-            <Undo2 className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">12</div>
-            <p className="text-xs text-muted-foreground">+5 منذ الأمس</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">تنبيهات انخفاض المخزون</CardTitle>
-            <AlertCircle className="h-4 w-4 text-accent" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-accent">32</div>
-            <p className="text-xs text-muted-foreground">عناصر تحتاج لإعادة التخزين</p>
-          </CardContent>
-        </Card>
+        <Dialog open={isReturnsDialogOpen} onOpenChange={setReturnsDialogOpen}>
+            <DialogTrigger asChild>
+                <Card className="cursor-pointer transition-colors hover:bg-muted/50">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">مرتجعات معلقة</CardTitle>
+                    <Undo2 className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{pendingReturns.length}</div>
+                    <p className="text-xs text-muted-foreground">عرض المرتجعات المعلقة</p>
+                  </CardContent>
+                </Card>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-lg">
+                <DialogHeader>
+                    <DialogTitle>المرتجعات المعلقة</DialogTitle>
+                    <DialogDescription>قائمة بجميع طلبات الإرجاع التي تنتظر الموافقة.</DialogDescription>
+                </DialogHeader>
+                <div className="max-h-[60vh] overflow-y-auto">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>المنتج</TableHead>
+                                <TableHead>رقم الفاتورة</TableHead>
+                                <TableHead>السبب</TableHead>
+                                <TableHead className="text-right">الكمية</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {pendingReturns.map((item) => (
+                                <TableRow key={item.id}>
+                                    <TableCell className="font-medium">{item.product}</TableCell>
+                                    <TableCell>{item.invoiceId}</TableCell>
+                                    <TableCell>{item.reason}</TableCell>
+                                    <TableCell className="text-right">{item.quantity}</TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </div>
+                <DialogFooter>
+                    <Button variant="outline" onClick={() => setReturnsDialogOpen(false)}>إغلاق</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+        
+        <Dialog open={isLowStockDialogOpen} onOpenChange={setLowStockDialogOpen}>
+            <DialogTrigger asChild>
+                <Card className="cursor-pointer transition-colors hover:bg-muted/50">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">تنبيهات انخفاض المخزون</CardTitle>
+                    <AlertCircle className="h-4 w-4 text-accent" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-accent">{lowStockProducts.length}</div>
+                    <p className="text-xs text-muted-foreground">عناصر تحتاج لإعادة التخزين</p>
+                  </CardContent>
+                </Card>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-lg">
+                <DialogHeader>
+                    <DialogTitle>تنبيهات انخفاض المخزون</DialogTitle>
+                    <DialogDescription>قائمة بالمنتجات التي وصل مخزونها إلى الحد الأدنى أو أقل.</DialogDescription>
+                </DialogHeader>
+                <div className="max-h-[60vh] overflow-y-auto">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>المنتج</TableHead>
+                                <TableHead className="text-center">المخزون الحالي</TableHead>
+                                <TableHead className="text-center">أدنى مخزون</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {lowStockProducts.map((product) => (
+                                <TableRow key={product.id}>
+                                    <TableCell className="font-medium">{product.name}</TableCell>
+                                    <TableCell className="text-center text-accent font-bold">{product.stock}</TableCell>
+                                    <TableCell className="text-center">{product.min_stock}</TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </div>
+                <DialogFooter>
+                    <Button variant="outline" onClick={() => setLowStockDialogOpen(false)}>إغلاق</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
       </div>
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Card>
