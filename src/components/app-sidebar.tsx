@@ -27,7 +27,7 @@ const Logo = () => (
       />
       {/* Oblique Cube - top face */}
       <path d="M 46,14 L 54,6 L 82,6 L 74,14 Z" 
-          fill="hsl(var(--sidebar-accent))" 
+          fill="hsl(var(--sidebar-primary))" 
           stroke="hsl(var(--sidebar-foreground))" 
           strokeWidth="1.5"
           strokeLinejoin="round"
