@@ -13,10 +13,13 @@ import {
 } from "@/components/ui/chart";
 import { Bar, BarChart, CartesianGrid, Line, LineChart, Pie, PieChart, XAxis, YAxis } from "recharts";
 import type { ChartConfig } from "@/components/ui/chart"
-import { Input } from './ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { DatePicker } from './ui/date-picker';
 import { Button } from './ui/button';
+import { Check, ChevronsUpDown } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from './ui/command';
 
 // Mock data
 const inventoryMovementsData = [
@@ -27,6 +30,11 @@ const inventoryMovementsData = [
     { product: 'موزع USB-C', warehouse: 'مستودع الدمام', quantity: -18, date: '2023-06-15' },
     { product: 'فأرة لاسلكية', warehouse: 'مستودع جدة', quantity: -10, date: '2023-06-20' },
 ];
+
+const productsForFilter = [...new Set(inventoryMovementsData.map(item => item.product))].map(productName => ({
+    value: productName.toLowerCase(),
+    label: productName
+}));
 
 const warehouses = [
     { id: "all", name: "كل المستودعات" },
@@ -81,11 +89,12 @@ const salesAndPurchasesConfig = {
 
 export function ReportsPage() {
     const [productFilter, setProductFilter] = useState('');
+    const [openProductFilter, setOpenProductFilter] = useState(false);
     const [warehouseFilter, setWarehouseFilter] = useState('كل المستودعات');
     const [dateFilter, setDateFilter] = useState<Date | undefined>();
 
     const filteredInventory = inventoryMovementsData.filter(item => {
-        const productMatch = item.product.toLowerCase().includes(productFilter.toLowerCase());
+        const productMatch = !productFilter || item.product.toLowerCase() === productFilter;
         const warehouseMatch = warehouseFilter === 'كل المستودعات' || item.warehouse === warehouseFilter;
         const dateMatch = !dateFilter || new Date(item.date).toDateString() === dateFilter.toDateString();
         return productMatch && warehouseMatch && dateMatch;
@@ -106,12 +115,49 @@ export function ReportsPage() {
                     <CardTitle>تقرير حركة المخزون</CardTitle>
                     <CardDescription>عرض شامل لحركات المنتجات مع فلاتر للبحث.</CardDescription>
                     <div className="mt-4 flex flex-wrap items-center gap-2">
-                        <Input 
-                            placeholder="فلترة باسم المنتج..."
-                            value={productFilter}
-                            onChange={(e) => setProductFilter(e.target.value)}
-                            className="max-w-sm"
-                        />
+                        <Popover open={openProductFilter} onOpenChange={setOpenProductFilter}>
+                            <PopoverTrigger asChild>
+                                <Button
+                                    variant="outline"
+                                    role="combobox"
+                                    aria-expanded={openProductFilter}
+                                    className="w-[200px] justify-between"
+                                >
+                                    {productFilter
+                                        ? productsForFilter.find((product) => product.value === productFilter)?.label
+                                        : "اختر منتجاً..."}
+                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-[200px] p-0">
+                                <Command>
+                                    <CommandInput placeholder="ابحث عن منتج..." />
+                                    <CommandEmpty>لم يتم العثور على منتج.</CommandEmpty>
+                                    <CommandList>
+                                        <CommandGroup>
+                                            {productsForFilter.map((product) => (
+                                                <CommandItem
+                                                    key={product.value}
+                                                    value={product.value}
+                                                    onSelect={(currentValue) => {
+                                                        setProductFilter(currentValue === productFilter ? "" : currentValue)
+                                                        setOpenProductFilter(false)
+                                                    }}
+                                                >
+                                                    <Check
+                                                        className={cn(
+                                                            "mr-2 h-4 w-4",
+                                                            productFilter === product.value ? "opacity-100" : "opacity-0"
+                                                        )}
+                                                    />
+                                                    {product.label}
+                                                </CommandItem>
+                                            ))}
+                                        </CommandGroup>
+                                    </CommandList>
+                                </Command>
+                            </PopoverContent>
+                        </Popover>
                         <Select value={warehouseFilter} onValueChange={setWarehouseFilter}>
                             <SelectTrigger className="w-[200px]">
                                 <SelectValue placeholder="اختر مستودعاً" />
