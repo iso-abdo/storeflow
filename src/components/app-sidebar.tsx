@@ -18,36 +18,51 @@ import Image from 'next/image';
 
 const Logo = () => (
   <svg width="120" height="60" viewBox="0 0 120 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-    {/* Box with A.i inside */}
-    <path d="M40 12 H 80 C 81.1046 12 82 12.8954 82 14 V 38 C 82 39.1046 81.1046 40 80 40 H 40 C 38.8954 40 38 39.1046 38 38 V 14 C 38 12.8954 38.8954 12 40 12 Z" 
-        stroke="hsl(var(--sidebar-foreground))" 
-        strokeWidth="2" 
-        fill="hsl(var(--sidebar-background))"
-    />
-    <text
-        x="60"
-        y="26"
-        fontFamily="Tajawal, sans-serif"
-        fontSize="14"
-        fontWeight="bold"
-        fill="hsl(var(--accent))"
-        textAnchor="middle"
-        dominantBaseline="middle"
-    >
-        A.i
-    </text>
+      {/* Oblique Cube - side face */}
+      <path d="M 70,22 L 78,14 L 78,38 L 70,46 Z" 
+          fill="hsl(var(--sidebar-border))" 
+          stroke="hsl(var(--sidebar-foreground))" 
+          strokeWidth="1.5" 
+          strokeLinejoin="round"
+      />
+      {/* Oblique Cube - top face */}
+      <path d="M 46,22 L 54,14 L 78,14 L 70,22 Z" 
+          fill="hsl(var(--sidebar-accent))" 
+          stroke="hsl(var(--sidebar-foreground))" 
+          strokeWidth="1.5"
+          strokeLinejoin="round"
+      />
+      {/* Oblique Cube - front face */}
+      <path d="M 46,22 L 70,22 L 70,46 L 46,46 Z" 
+          fill="hsl(var(--sidebar-background))" 
+          stroke="hsl(var(--sidebar-foreground))" 
+          strokeWidth="1.5"
+          strokeLinejoin="round"
+      />
+      <text
+          x="58"
+          y="34"
+          fontFamily="Tajawal, sans-serif"
+          fontSize="10"
+          fontWeight="bold"
+          fill="hsl(var(--accent))"
+          textAnchor="middle"
+          dominantBaseline="middle"
+      >
+          A.i
+      </text>
 
-    <text
-        x="60"
-        y="56"
-        fontFamily="Tajawal, sans-serif"
-        fontSize="16"
-        fontWeight="bold"
-        fill="hsl(var(--sidebar-foreground))"
-        textAnchor="middle"
-    >
-        StoreFlow
-    </text>
+      <text
+          x="60"
+          y="56"
+          fontFamily="Tajawal, sans-serif"
+          fontSize="16"
+          fontWeight="bold"
+          fill="hsl(var(--sidebar-foreground))"
+          textAnchor="middle"
+      >
+          StoreFlow
+      </text>
   </svg>
 );
 
