@@ -1,5 +1,5 @@
 'use client';
-import { Bell, Search } from 'lucide-react';
+import { Bell, Search, AlertCircle, Undo2 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { SidebarTrigger } from './ui/sidebar';
@@ -13,6 +13,12 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import Image from 'next/image';
+
+const notifications = [
+    { type: 'low_stock', product: 'لوحة مفاتيح ميكانيكية' },
+    { type: 'pending_return', product: 'شاشة 4K' },
+    { type: 'low_stock', product: 'فأرة لاسلكية' },
+];
 
 export function AppHeader() {
   return (
@@ -30,10 +36,45 @@ export function AppHeader() {
           </div>
         </form>
       </div>
-      <Button variant="ghost" size="icon" className="rounded-full">
-        <Bell className="h-5 w-5" />
-        <span className="sr-only">تبديل الإشعارات</span>
-      </Button>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="icon" className="relative rounded-full">
+            <Bell className="h-5 w-5" />
+            {notifications.length > 0 && (
+              <span className="absolute top-1 right-1 flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-accent"></span>
+              </span>
+            )}
+            <span className="sr-only">تبديل الإشعارات</span>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-[320px]">
+          <DropdownMenuLabel>الإشعارات</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          {notifications.length > 0 ? (
+            notifications.map((notification, index) => (
+              <DropdownMenuItem key={index} className="gap-3">
+                {notification.type === 'low_stock' ? (
+                  <AlertCircle className="h-4 w-4 text-accent" />
+                ) : (
+                  <Undo2 className="h-4 w-4 text-primary" />
+                )}
+                <div className="flex flex-col">
+                  <span className="font-medium">
+                    {notification.type === 'low_stock' ? 'انخفاض المخزون' : 'مرتجع معلق'}
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    {notification.product}
+                  </span>
+                </div>
+              </DropdownMenuItem>
+            ))
+          ) : (
+            <DropdownMenuItem disabled>لا توجد إشعارات جديدة</DropdownMenuItem>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="icon" className="rounded-full">
