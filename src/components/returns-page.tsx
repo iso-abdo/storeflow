@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PlusCircle } from "lucide-react";
+import { PlusCircle, CheckCircle2, XCircle } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -78,6 +78,12 @@ export function ReturnsPage() {
         form.reset();
         setIsDialogOpen(false);
     }
+    
+    const handleStatusChange = (returnId: string, newStatus: 'تمت الموافقة' | 'مرفوض') => {
+        setReturns(returns.map(r => 
+            r.id === returnId ? { ...r, status: newStatus } : r
+        ));
+    };
 
   return (
     <div className="flex flex-col gap-6">
@@ -188,7 +194,8 @@ export function ReturnsPage() {
                         <TableHead>الكمية</TableHead>
                         <TableHead>السبب</TableHead>
                         <TableHead>الحالة</TableHead>
-                        <TableHead className="text-right">التاريخ</TableHead>
+                        <TableHead>التاريخ</TableHead>
+                        <TableHead className="text-right">الإجراءات</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -206,7 +213,33 @@ export function ReturnsPage() {
                                     : 'secondary'
                                 }>{ret.status}</Badge>
                             </TableCell>
-                            <TableCell className="text-right">{ret.date}</TableCell>
+                            <TableCell>{ret.date}</TableCell>
+                            <TableCell className="text-right">
+                                {ret.status === 'قيد الانتظار' ? (
+                                    <div className="flex items-center justify-end gap-2">
+                                        <Button 
+                                            variant="ghost" 
+                                            size="icon" 
+                                            onClick={() => handleStatusChange(ret.id, 'تمت الموافقة')}
+                                            aria-label="Approve return"
+                                            className='hover:bg-primary/10'
+                                        >
+                                            <CheckCircle2 className="h-4 w-4 text-primary" />
+                                        </Button>
+                                        <Button 
+                                            variant="ghost" 
+                                            size="icon" 
+                                            onClick={() => handleStatusChange(ret.id, 'مرفوض')}
+                                            aria-label="Reject return"
+                                            className='hover:bg-destructive/10'
+                                        >
+                                            <XCircle className="h-4 w-4 text-destructive" />
+                                        </Button>
+                                    </div>
+                                ) : (
+                                   <span>—</span>
+                                )}
+                            </TableCell>
                         </TableRow>
                     ))}
                 </TableBody>
