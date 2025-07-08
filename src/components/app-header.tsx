@@ -1,5 +1,5 @@
 'use client';
-import { Bell, Search, AlertCircle, Undo2 } from 'lucide-react';
+import { Bell, Search, AlertCircle, Undo2, LogOut } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { SidebarTrigger } from './ui/sidebar';
@@ -18,6 +18,9 @@ import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from './ui/command';
 import { useRouter } from 'next/navigation';
 import { products } from '@/lib/data';
+import { signOut } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
+import { useToast } from '@/hooks/use-toast';
 
 
 const notifications = [
@@ -31,6 +34,7 @@ export function AppHeader() {
   const [open, setOpen] = React.useState(false);
   const [search, setSearch] = React.useState("");
   const router = useRouter();
+  const { toast } = useToast();
 
   const filteredProducts = search
     ? products.filter((product) =>
@@ -51,6 +55,19 @@ export function AppHeader() {
     setOpen(false);
     setSearch("");
     router.push(`/products/${productId}`);
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await signOut(auth);
+      toast({ title: "تم تسجيل الخروج بنجاح." });
+      router.push('/login');
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'حدث خطأ أثناء تسجيل الخروج.',
+      });
+    }
   };
 
   return (
@@ -154,7 +171,10 @@ export function AppHeader() {
           <DropdownMenuItem>الإعدادات</DropdownMenuItem>
           <DropdownMenuItem>الدعم</DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem>تسجيل الخروج</DropdownMenuItem>
+          <DropdownMenuItem onClick={handleSignOut}>
+            <LogOut className="mr-2 h-4 w-4" />
+            تسجيل الخروج
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     </header>

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { AreaChart, Boxes, LayoutDashboard, Warehouse, Undo2 } from 'lucide-react';
+import { AreaChart, Boxes, LayoutDashboard, Warehouse, Undo2, Users } from 'lucide-react';
 
 import {
   SidebarHeader,
@@ -77,6 +77,7 @@ export function AppSidebar() {
     { href: '/inventory', label: 'المخزون', icon: Warehouse },
     { href: '/returns', label: 'المرتجعات', icon: Undo2 },
     { href: '/reports', label: 'التقارير', icon: AreaChart },
+    { href: '/users', label: 'المستخدمون', icon: Users },
   ];
 
   return (
