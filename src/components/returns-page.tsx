@@ -57,6 +57,7 @@ const currentUserRole = 'admin';
 export function ReturnsPage() {
     const [returns, setReturns] = useState(initialReturns);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
 
     const form = useForm<z.infer<typeof returnSchema>>({
         resolver: zodResolver(returnSchema),
@@ -86,6 +87,10 @@ export function ReturnsPage() {
             r.id === returnId ? { ...r, status: newStatus } : r
         ));
     };
+
+    const filteredReturns = returns.filter(ret => 
+        ret.product.toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
   return (
     <div className="flex flex-col gap-6">
@@ -183,8 +188,16 @@ export function ReturnsPage() {
         </div>
         <Card>
             <CardHeader>
-            <CardTitle>سجل المرتجعات</CardTitle>
-            <CardDescription>عرض وإدارة المرتجعات من العملاء أو للموردين.</CardDescription>
+                <CardTitle>سجل المرتجعات</CardTitle>
+                <CardDescription>عرض وإدارة المرتجعات من العملاء أو للموردين.</CardDescription>
+                <div className="pt-4">
+                    <Input 
+                        placeholder="ابحث عن مرتجع باسم المنتج..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="max-w-sm"
+                    />
+                </div>
             </CardHeader>
             <CardContent>
             <Table>
@@ -201,7 +214,7 @@ export function ReturnsPage() {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {returns.map((ret) => (
+                    {filteredReturns.map((ret) => (
                         <TableRow key={ret.id}>
                             <TableCell className="font-mono">{ret.id}</TableCell>
                             <TableCell>{ret.invoiceId}</TableCell>
