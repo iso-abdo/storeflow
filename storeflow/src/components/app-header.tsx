@@ -39,12 +39,12 @@ export function AppHeader() {
     : [];
 
   React.useEffect(() => {
-    if (search.length > 0) {
+    if (search.length > 0 && filteredProducts.length > 0) {
       setOpen(true);
     } else {
       setOpen(false);
     }
-  }, [search]);
+  }, [search, filteredProducts.length]);
 
 
   const handleSelect = (productId: string) => {
