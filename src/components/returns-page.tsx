@@ -51,6 +51,8 @@ const returnSchema = z.object({
     reason: z.string().min(1, { message: "الرجاء اختيار سبب الإرجاع" }),
 });
 
+const currentUserRole = 'admin';
+
 
 export function ReturnsPage() {
     const [returns, setReturns] = useState(initialReturns);
@@ -216,26 +218,30 @@ export function ReturnsPage() {
                             <TableCell>{ret.date}</TableCell>
                             <TableCell className="text-right">
                                 {ret.status === 'قيد الانتظار' ? (
-                                    <div className="flex items-center justify-end gap-2">
-                                        <Button 
-                                            variant="ghost" 
-                                            size="icon" 
-                                            onClick={() => handleStatusChange(ret.id, 'تمت الموافقة')}
-                                            aria-label="Approve return"
-                                            className='hover:bg-primary/10'
-                                        >
-                                            <CheckCircle2 className="h-4 w-4 text-primary" />
-                                        </Button>
-                                        <Button 
-                                            variant="ghost" 
-                                            size="icon" 
-                                            onClick={() => handleStatusChange(ret.id, 'مرفوض')}
-                                            aria-label="Reject return"
-                                            className='hover:bg-destructive/10'
-                                        >
-                                            <XCircle className="h-4 w-4 text-destructive" />
-                                        </Button>
-                                    </div>
+                                    currentUserRole === 'admin' ? (
+                                        <div className="flex items-center justify-end gap-2">
+                                            <Button 
+                                                variant="ghost" 
+                                                size="icon" 
+                                                onClick={() => handleStatusChange(ret.id, 'تمت الموافقة')}
+                                                aria-label="Approve return"
+                                                className='hover:bg-primary/10'
+                                            >
+                                                <CheckCircle2 className="h-4 w-4 text-primary" />
+                                            </Button>
+                                            <Button 
+                                                variant="ghost" 
+                                                size="icon" 
+                                                onClick={() => handleStatusChange(ret.id, 'مرفوض')}
+                                                aria-label="Reject return"
+                                                className='hover:bg-destructive/10'
+                                            >
+                                                <XCircle className="h-4 w-4 text-destructive" />
+                                            </Button>
+                                        </div>
+                                    ) : (
+                                        <span className="text-xs text-muted-foreground">قيد المراجعة</span>
+                                    )
                                 ) : (
                                    <span>—</span>
                                 )}
