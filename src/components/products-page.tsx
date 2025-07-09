@@ -188,7 +188,7 @@ export function ProductsPage() {
                             <DialogHeader>
                                 <DialogTitle>إضافة منتج جديد</DialogTitle>
                                 <DialogDescription>
-                                    أدخل تفاصيل المنتج الجديد هنا. انقر على "حفظ" عند الانتهاء.
+                                    أدخل تفاصيل المنتج الجديد هنا. انقر على "حفظ المنتج" عند الانتهاء.
                                 </DialogDescription>
                             </DialogHeader>
                             <Form {...form}>
@@ -291,7 +291,7 @@ export function ProductsPage() {
                                         )}
                                     />
                                     <DialogFooter>
-                                        <Button type="submit">حفظ التغييرات</Button>
+                                        <Button type="submit">حفظ المنتج</Button>
                                     </DialogFooter>
                                 </form>
                             </Form>
