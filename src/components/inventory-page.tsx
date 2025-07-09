@@ -227,67 +227,69 @@ export function InventoryPage() {
                             إدخال مخزون
                         </Button>
                     </DialogTrigger>
-                    <DialogContent>
+                    <DialogContent className="sm:max-w-md">
                         <DialogHeader>
                             <DialogTitle>إدخال مخزون جديد</DialogTitle>
                             <DialogDescription>اختر المنتج والمستودع والكمية المدخلة.</DialogDescription>
                         </DialogHeader>
                         <Form {...formIn}>
-                            <form onSubmit={formIn.handleSubmit((v) => handleMovement('إدخال', v))} className="space-y-4">
-                                <FormField
-                                    control={formIn.control}
-                                    name="productId"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>المنتج</FormLabel>
-                                            <FormControl>
+                            <form onSubmit={formIn.handleSubmit((v) => handleMovement('إدخال', v))}>
+                                <div className="space-y-4 max-h-[70vh] overflow-y-auto p-1 pr-4">
+                                    <FormField
+                                        control={formIn.control}
+                                        name="productId"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>المنتج</FormLabel>
                                                 <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="اختر منتجاً" />
-                                                    </SelectTrigger>
+                                                    <FormControl>
+                                                        <SelectTrigger>
+                                                            <SelectValue placeholder="اختر منتجاً" />
+                                                        </SelectTrigger>
+                                                    </FormControl>
                                                     <SelectContent>
                                                         {products.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
                                                     </SelectContent>
                                                 </Select>
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={formIn.control}
-                                    name="warehouseId"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>المستودع</FormLabel>
-                                            <FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={formIn.control}
+                                        name="warehouseId"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>المستودع</FormLabel>
                                                 <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="اختر مستودعاً" />
-                                                    </SelectTrigger>
+                                                    <FormControl>
+                                                        <SelectTrigger>
+                                                            <SelectValue placeholder="اختر مستودعاً" />
+                                                        </SelectTrigger>
+                                                    </FormControl>
                                                     <SelectContent>
                                                         {warehouses.map(w => <SelectItem key={w.id} value={w.id}>{w.name}</SelectItem>)}
                                                     </SelectContent>
                                                 </Select>
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={formIn.control}
-                                    name="quantity"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>الكمية</FormLabel>
-                                            <FormControl>
-                                                <Input type="number" {...field} />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <DialogFooter>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={formIn.control}
+                                        name="quantity"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>الكمية</FormLabel>
+                                                <FormControl>
+                                                    <Input type="number" {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </div>
+                                <DialogFooter className="pt-4">
                                     <Button type="submit">حفظ</Button>
                                 </DialogFooter>
                             </form>
@@ -302,67 +304,69 @@ export function InventoryPage() {
                             إخراج مخزون
                         </Button>
                     </DialogTrigger>
-                    <DialogContent>
+                    <DialogContent className="sm:max-w-md">
                         <DialogHeader>
                             <DialogTitle>إخراج مخزون</DialogTitle>
                             <DialogDescription>اختر المنتج والمستودع والكمية المخرجة.</DialogDescription>
                         </DialogHeader>
                         <Form {...formOut}>
-                            <form onSubmit={formOut.handleSubmit((v) => handleMovement('إخراج', v))} className="space-y-4">
-                                <FormField
-                                    control={formOut.control}
-                                    name="productId"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>المنتج</FormLabel>
-                                            <FormControl>
+                            <form onSubmit={formOut.handleSubmit((v) => handleMovement('إخراج', v))}>
+                                <div className="space-y-4 max-h-[70vh] overflow-y-auto p-1 pr-4">
+                                    <FormField
+                                        control={formOut.control}
+                                        name="productId"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>المنتج</FormLabel>
                                                 <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="اختر منتجاً" />
-                                                    </SelectTrigger>
+                                                    <FormControl>
+                                                        <SelectTrigger>
+                                                            <SelectValue placeholder="اختر منتجاً" />
+                                                        </SelectTrigger>
+                                                    </FormControl>
                                                     <SelectContent>
                                                         {products.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
                                                     </SelectContent>
                                                 </Select>
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={formOut.control}
-                                    name="warehouseId"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>المستودع</FormLabel>
-                                            <FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={formOut.control}
+                                        name="warehouseId"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>المستودع</FormLabel>
                                                 <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="اختر مستودعاً" />
-                                                    </SelectTrigger>
+                                                    <FormControl>
+                                                        <SelectTrigger>
+                                                            <SelectValue placeholder="اختر مستودعاً" />
+                                                        </SelectTrigger>
+                                                    </FormControl>
                                                     <SelectContent>
                                                         {warehouses.map(w => <SelectItem key={w.id} value={w.id}>{w.name}</SelectItem>)}
                                                     </SelectContent>
                                                 </Select>
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={formOut.control}
-                                    name="quantity"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>الكمية</FormLabel>
-                                            <FormControl>
-                                                <Input type="number" {...field} />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <DialogFooter>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={formOut.control}
+                                        name="quantity"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>الكمية</FormLabel>
+                                                <FormControl>
+                                                    <Input type="number" {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </div>
+                                <DialogFooter className="pt-4">
                                     <Button type="submit">إخراج</Button>
                                 </DialogFooter>
                             </form>
@@ -377,87 +381,89 @@ export function InventoryPage() {
                             تحويل مخزون
                         </Button>
                     </DialogTrigger>
-                    <DialogContent>
+                    <DialogContent className="sm:max-w-md">
                         <DialogHeader>
                             <DialogTitle>تحويل مخزون</DialogTitle>
                             <DialogDescription>نقل المنتجات بين المستودعات.</DialogDescription>
                         </DialogHeader>
                         <Form {...formTransfer}>
-                            <form onSubmit={formTransfer.handleSubmit(handleTransfer)} className="space-y-4">
-                               <FormField
-                                    control={formTransfer.control}
-                                    name="productId"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>المنتج</FormLabel>
-                                            <FormControl>
+                            <form onSubmit={formTransfer.handleSubmit(handleTransfer)}>
+                               <div className="space-y-4 max-h-[70vh] overflow-y-auto p-1 pr-4">
+                                    <FormField
+                                        control={formTransfer.control}
+                                        name="productId"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>المنتج</FormLabel>
                                                 <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="اختر منتجاً" />
-                                                    </SelectTrigger>
+                                                    <FormControl>
+                                                        <SelectTrigger>
+                                                            <SelectValue placeholder="اختر منتجاً" />
+                                                        </SelectTrigger>
+                                                    </FormControl>
                                                     <SelectContent>
                                                         {products.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
                                                     </SelectContent>
                                                 </Select>
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={formTransfer.control}
-                                    name="fromWarehouseId"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>من مستودع</FormLabel>
-                                            <FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={formTransfer.control}
+                                        name="fromWarehouseId"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>من مستودع</FormLabel>
                                                 <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="اختر المستودع المصدر" />
-                                                    </SelectTrigger>
+                                                    <FormControl>
+                                                        <SelectTrigger>
+                                                            <SelectValue placeholder="اختر المستودع المصدر" />
+                                                        </SelectTrigger>
+                                                    </FormControl>
                                                     <SelectContent>
                                                         {warehouses.map(w => <SelectItem key={w.id} value={w.id}>{w.name}</SelectItem>)}
                                                     </SelectContent>
                                                 </Select>
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={formTransfer.control}
-                                    name="toWarehouseId"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>إلى مستودع</FormLabel>
-                                            <FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={formTransfer.control}
+                                        name="toWarehouseId"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>إلى مستودع</FormLabel>
                                                 <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="اختر المستودع الهدف" />
-                                                    </SelectTrigger>
+                                                    <FormControl>
+                                                        <SelectTrigger>
+                                                            <SelectValue placeholder="اختر المستودع الهدف" />
+                                                        </SelectTrigger>
+                                                    </FormControl>
                                                     <SelectContent>
                                                         {warehouses.map(w => <SelectItem key={w.id} value={w.id}>{w.name}</SelectItem>)}
                                                     </SelectContent>
                                                 </Select>
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={formTransfer.control}
-                                    name="quantity"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>الكمية</FormLabel>
-                                            <FormControl>
-                                                <Input type="number" {...field} />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <DialogFooter>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={formTransfer.control}
+                                        name="quantity"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>الكمية</FormLabel>
+                                                <FormControl>
+                                                    <Input type="number" {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                               </div>
+                                <DialogFooter className="pt-4">
                                     <Button type="submit">تحويل</Button>
                                 </DialogFooter>
                             </form>

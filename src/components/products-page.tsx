@@ -202,7 +202,7 @@ export function ProductsPage() {
                                 إضافة منتج جديد
                             </Button>
                         </DialogTrigger>
-                        <DialogContent className="sm:max-w-[480px]">
+                        <DialogContent className="sm:max-w-lg">
                             <DialogHeader>
                                 <DialogTitle>إضافة منتج جديد</DialogTitle>
                                 <DialogDescription>
@@ -210,105 +210,107 @@ export function ProductsPage() {
                                 </DialogDescription>
                             </DialogHeader>
                             <Form {...form}>
-                                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                                    <FormItem>
-                                        <FormLabel>صورة المنتج</FormLabel>
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-24 h-24 rounded-md bg-muted flex items-center justify-center border">
-                                                <Image 
-                                                    src={capturedImage || "https://placehold.co/400x400.png"} 
-                                                    alt="Product" 
-                                                    width={96} 
-                                                    height={96} 
-                                                    className="rounded-md object-cover aspect-square"
-                                                    data-ai-hint="product image"
-                                                />
+                                <form onSubmit={form.handleSubmit(onSubmit)}>
+                                    <div className="space-y-4 max-h-[70vh] overflow-y-auto p-1 pr-4">
+                                        <FormItem>
+                                            <FormLabel>صورة المنتج</FormLabel>
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-24 h-24 rounded-md bg-muted flex items-center justify-center border">
+                                                    <Image 
+                                                        src={capturedImage || "https://placehold.co/400x400.png"} 
+                                                        alt="Product" 
+                                                        width={96} 
+                                                        height={96} 
+                                                        className="rounded-md object-cover aspect-square"
+                                                        data-ai-hint="product image"
+                                                    />
+                                                </div>
+                                                <Button type="button" variant="outline" onClick={() => setIsCameraDialogOpen(true)}>
+                                                    <Camera className="ml-2 h-4 w-4" />
+                                                    التقاط صورة
+                                                </Button>
                                             </div>
-                                            <Button type="button" variant="outline" onClick={() => setIsCameraDialogOpen(true)}>
-                                                <Camera className="ml-2 h-4 w-4" />
-                                                التقاط صورة
-                                            </Button>
-                                        </div>
-                                    </FormItem>
-                                    <FormField
-                                        control={form.control}
-                                        name="name"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>اسم المنتج</FormLabel>
-                                                <FormControl>
-                                                    <Input {...field} />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={form.control}
-                                        name="barcode"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>الباركود</FormLabel>
-                                                <FormControl>
-                                                    <Input {...field} />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={form.control}
-                                        name="category"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>الفئة</FormLabel>
-                                                <FormControl>
-                                                    <Input {...field} />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={form.control}
-                                        name="price"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>السعر</FormLabel>
-                                                <FormControl>
-                                                    <Input type="number" {...field} />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                     <FormField
-                                        control={form.control}
-                                        name="stock"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>المخزون</FormLabel>
-                                                <FormControl>
-                                                    <Input type="number" {...field} />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={form.control}
-                                        name="min_stock"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>أدنى مخزون</FormLabel>
-                                                <FormControl>
-                                                    <Input type="number" {...field} />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <DialogFooter>
+                                        </FormItem>
+                                        <FormField
+                                            control={form.control}
+                                            name="name"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>اسم المنتج</FormLabel>
+                                                    <FormControl>
+                                                        <Input {...field} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={form.control}
+                                            name="barcode"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>الباركود</FormLabel>
+                                                    <FormControl>
+                                                        <Input {...field} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={form.control}
+                                            name="category"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>الفئة</FormLabel>
+                                                    <FormControl>
+                                                        <Input {...field} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={form.control}
+                                            name="price"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>السعر</FormLabel>
+                                                    <FormControl>
+                                                        <Input type="number" {...field} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={form.control}
+                                            name="stock"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>المخزون</FormLabel>
+                                                    <FormControl>
+                                                        <Input type="number" {...field} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={form.control}
+                                            name="min_stock"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>أدنى مخزون</FormLabel>
+                                                    <FormControl>
+                                                        <Input type="number" {...field} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </div>
+                                    <DialogFooter className="pt-4">
                                         <Button type="submit">حفظ المنتج</Button>
                                     </DialogFooter>
                                 </form>

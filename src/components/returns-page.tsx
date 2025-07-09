@@ -222,76 +222,78 @@ export function ReturnsPage() {
                         <DialogDescription>أدخل تفاصيل الإرجاع. سيتم مراجعة الطلب من قبل المدير.</DialogDescription>
                     </DialogHeader>
                     <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                            <FormField
-                                control={form.control}
-                                name="invoiceId"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>رقم الفاتورة الأصلية</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="مثال: INV2023-101" {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="productId"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>المنتج المرتجع</FormLabel>
-                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <form onSubmit={form.handleSubmit(onSubmit)}>
+                            <div className="space-y-4 max-h-[70vh] overflow-y-auto p-1 pr-4">
+                                <FormField
+                                    control={form.control}
+                                    name="invoiceId"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>رقم الفاتورة الأصلية</FormLabel>
                                             <FormControl>
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="اختر منتجاً" />
-                                                </SelectTrigger>
+                                                <Input placeholder="مثال: INV2023-101" {...field} />
                                             </FormControl>
-                                            <SelectContent>
-                                                {products.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
-                                            </SelectContent>
-                                        </Select>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="quantity"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>الكمية</FormLabel>
-                                        <FormControl>
-                                            <Input type="number" {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="reason"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>سبب الإرجاع</FormLabel>
-                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="productId"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>المنتج المرتجع</FormLabel>
+                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                <FormControl>
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="اختر منتجاً" />
+                                                    </SelectTrigger>
+                                                </FormControl>
+                                                <SelectContent>
+                                                    {products.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+                                                </SelectContent>
+                                            </Select>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="quantity"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>الكمية</FormLabel>
                                             <FormControl>
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="اختر سبب الإرجاع" />
-                                                </SelectTrigger>
+                                                <Input type="number" {...field} />
                                             </FormControl>
-                                            <SelectContent>
-                                                <SelectItem value="تالف">تالف</SelectItem>
-                                                <SelectItem value="منتج خاطئ">منتج خاطئ</SelectItem>
-                                                <SelectItem value="أخرى">أخرى</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <DialogFooter>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="reason"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>سبب الإرجاع</FormLabel>
+                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                <FormControl>
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="اختر سبب الإرجاع" />
+                                                    </SelectTrigger>
+                                                </FormControl>
+                                                <SelectContent>
+                                                    <SelectItem value="تالف">تالف</SelectItem>
+                                                    <SelectItem value="منتج خاطئ">منتج خاطئ</SelectItem>
+                                                    <SelectItem value="أخرى">أخرى</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
+                            <DialogFooter className="pt-4">
                                 <Button type="submit">إرسال الطلب</Button>
                             </DialogFooter>
                         </form>
