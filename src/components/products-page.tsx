@@ -7,7 +7,7 @@ import * as z from 'zod';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { PlusCircle, Camera, AlertCircle } from "lucide-react";
+import { PlusCircle, Camera, AlertCircle, Check, ChevronsUpDown } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -33,6 +33,9 @@ import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { collection, addDoc, query, onSnapshot, orderBy, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Skeleton } from './ui/skeleton';
+import { cn } from '@/lib/utils';
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from './ui/command';
 
 
 const productSchema = z.object({
@@ -64,6 +67,8 @@ export function ProductsPage() {
     const [isCameraDialogOpen, setIsCameraDialogOpen] = useState(false);
     const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
     const [capturedImage, setCapturedImage] = useState<string | null>(null);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [openProductFilter, setOpenProductFilter] = useState(false);
 
     const videoRef = useRef<HTMLVideoElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -171,6 +176,15 @@ export function ProductsPage() {
             });
         }
     }
+
+    const productsForFilter = products.map(p => ({
+        value: p.name.toLowerCase(),
+        label: p.name
+    }));
+
+    const filteredProducts = searchQuery
+        ? products.filter(p => p.name.toLowerCase() === searchQuery)
+        : products;
 
     return (
         <>
@@ -302,6 +316,33 @@ export function ProductsPage() {
                     <CardHeader>
                         <CardTitle>قائمة المنتجات</CardTitle>
                         <CardDescription>عرض وتعديل جميع المنتجات في المخزون.</CardDescription>
+                        <div className="pt-4 flex items-center gap-2">
+                            <Popover open={openProductFilter} onOpenChange={setOpenProductFilter}>
+                                <PopoverTrigger asChild>
+                                    <Button variant="outline" role="combobox" aria-expanded={openProductFilter} className="w-[250px] justify-between" >
+                                        {searchQuery ? productsForFilter.find((p) => p.value === searchQuery)?.label : "ابحث عن منتج..."}
+                                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-[250px] p-0">
+                                    <Command>
+                                        <CommandInput placeholder="ابحث عن منتج..." />
+                                        <CommandList>
+                                            <CommandEmpty>لم يتم العثور على منتج.</CommandEmpty>
+                                            <CommandGroup>
+                                                {productsForFilter.map((p) => (
+                                                    <CommandItem key={p.value} value={p.value} onSelect={(currentValue) => { setSearchQuery(currentValue === searchQuery ? "" : currentValue); setOpenProductFilter(false); }}>
+                                                        <Check className={cn("mr-2 h-4 w-4", searchQuery === p.value ? "opacity-100" : "opacity-0")} />
+                                                        {p.label}
+                                                    </CommandItem>
+                                                ))}
+                                            </CommandGroup>
+                                        </CommandList>
+                                    </Command>
+                                </PopoverContent>
+                            </Popover>
+                            {searchQuery && <Button variant="ghost" onClick={() => setSearchQuery('')}>مسح الفلتر</Button>}
+                        </div>
                     </CardHeader>
                     <CardContent>
                         <Table>
@@ -329,7 +370,7 @@ export function ProductsPage() {
                                             <TableCell className="text-right"><Skeleton className="h-4 w-[80px] ml-auto" /></TableCell>
                                         </TableRow>
                                     ))
-                                ) : products.map((product) => (
+                                ) : filteredProducts.map((product) => (
                                     <TableRow key={product.id}>
                                         <TableCell>
                                             <Image

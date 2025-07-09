@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, CheckCircle2, XCircle } from "lucide-react";
+import { PlusCircle, CheckCircle2, XCircle, Check, ChevronsUpDown } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -45,6 +45,9 @@ import { collection, onSnapshot, query, orderBy, addDoc, serverTimestamp, doc, u
 import { db } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from './ui/skeleton';
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from './ui/command';
+import { cn } from '@/lib/utils';
 
 interface Product {
     id: string;
@@ -77,7 +80,8 @@ export function ReturnsPage() {
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
-    const [searchQuery, setSearchQuery] = useState('');
+    const [productFilter, setProductFilter] = useState('');
+    const [openProductFilter, setOpenProductFilter] = useState(false);
     const { toast } = useToast();
 
     const form = useForm<z.infer<typeof returnSchema>>({
@@ -192,9 +196,14 @@ export function ReturnsPage() {
         }
     };
 
-    const filteredReturns = returns.filter(ret => 
-        ret.product.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const productsInReturns = [...new Set(returns.map(r => r.product))].map(p => ({
+        value: p.toLowerCase(),
+        label: p,
+    }));
+    
+    const filteredReturns = productFilter
+        ? returns.filter(ret => ret.product.toLowerCase() === productFilter)
+        : returns;
 
   return (
     <div className="flex flex-col gap-6">
@@ -294,13 +303,32 @@ export function ReturnsPage() {
             <CardHeader>
                 <CardTitle>سجل المرتجعات</CardTitle>
                 <CardDescription>عرض وإدارة المرتجعات من العملاء أو للموردين.</CardDescription>
-                <div className="pt-4">
-                    <Input 
-                        placeholder="ابحث عن مرتجع باسم المنتج..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="max-w-sm"
-                    />
+                <div className="pt-4 flex items-center gap-2">
+                    <Popover open={openProductFilter} onOpenChange={setOpenProductFilter}>
+                        <PopoverTrigger asChild>
+                            <Button variant="outline" role="combobox" aria-expanded={openProductFilter} className="w-[250px] justify-between">
+                                {productFilter ? productsInReturns.find((p) => p.value === productFilter)?.label : "تصفية حسب المنتج..."}
+                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[250px] p-0">
+                            <Command>
+                                <CommandInput placeholder="ابحث عن منتج..." />
+                                <CommandList>
+                                    <CommandEmpty>لم يتم العثور على منتج.</CommandEmpty>
+                                    <CommandGroup>
+                                        {productsInReturns.map((p) => (
+                                            <CommandItem key={p.value} value={p.value} onSelect={(currentValue) => { setProductFilter(currentValue === productFilter ? "" : currentValue); setOpenProductFilter(false); }}>
+                                                <Check className={cn("mr-2 h-4 w-4", productFilter === p.value ? "opacity-100" : "opacity-0")} />
+                                                {p.label}
+                                            </CommandItem>
+                                        ))}
+                                    </CommandGroup>
+                                </CommandList>
+                            </Command>
+                        </PopoverContent>
+                    </Popover>
+                    {productFilter && <Button variant="ghost" onClick={() => setProductFilter('')}>مسح الفلتر</Button>}
                 </div>
             </CardHeader>
             <CardContent>
