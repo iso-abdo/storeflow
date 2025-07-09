@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AlertCircle, Boxes, Pencil, PlusCircle, Trash2, Undo2, Warehouse } from "lucide-react";
 import { BarChart, Bar, CartesianGrid, XAxis, YAxis } from "recharts"
 import {
@@ -35,7 +35,11 @@ import {
   } from "@/components/ui/dialog";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
-import { chartData, products as initialProducts, warehouses as initialWarehouses, recentActivities, returns as pendingReturns } from "@/lib/data";
+import { chartData, recentActivities } from "@/lib/data";
+import { collection, query, onSnapshot, where, addDoc, serverTimestamp, doc, updateDoc, deleteDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import { useToast } from "@/hooks/use-toast";
+import { Skeleton } from "./ui/skeleton";
 
 
 const chartConfig = {
@@ -43,42 +47,104 @@ const chartConfig = {
   out: { label: 'مخزون صادر', color: 'hsl(var(--destructive))' },
 }
 
-const lowStockProducts = initialProducts.filter(p => p.stock <= p.min_stock);
+interface Product {
+    id: string;
+    name: string;
+    stock: number;
+    min_stock: number;
+}
+interface Warehouse {
+    id: string;
+    name: string;
+}
+interface Return {
+    id: string;
+    product: string;
+    invoiceId: string;
+    reason: string;
+    quantity: number;
+}
 
 
 export function DashboardPage() {
-    const [products] = useState(initialProducts);
-    const [warehouses, setWarehouses] = useState(initialWarehouses);
+    const [products, setProducts] = useState<Product[]>([]);
+    const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
+    const [pendingReturns, setPendingReturns] = useState<Return[]>([]);
+    const [loading, setLoading] = useState(true);
+
     const [isProductsDialogOpen, setProductsDialogOpen] = useState(false);
     const [isWarehousesDialogOpen, setWarehousesDialogOpen] = useState(false);
     const [isReturnsDialogOpen, setReturnsDialogOpen] = useState(false);
     const [isLowStockDialogOpen, setLowStockDialogOpen] = useState(false);
     
     const [newWarehouseName, setNewWarehouseName] = useState('');
-    const [editingWarehouse, setEditingWarehouse] = useState<{id: string; name: string} | null>(null);
+    const [editingWarehouse, setEditingWarehouse] = useState<Warehouse | null>(null);
+    const { toast } = useToast();
 
-    const handleAddWarehouse = () => {
+    useEffect(() => {
+        const qProducts = query(collection(db, "products"));
+        const qWarehouses = query(collection(db, "warehouses"));
+        const qReturns = query(collection(db, "returns"), where("status", "==", "قيد الانتظار"));
+
+        const unsubProducts = onSnapshot(qProducts, (snapshot) => {
+            setProducts(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product)));
+            checkLoading();
+        });
+        const unsubWarehouses = onSnapshot(qWarehouses, (snapshot) => {
+            setWarehouses(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Warehouse)));
+            checkLoading();
+        });
+        const unsubReturns = onSnapshot(qReturns, (snapshot) => {
+            setPendingReturns(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Return)));
+            checkLoading();
+        });
+
+        const checkLoading = () => {
+            if (loading) setLoading(false);
+        }
+
+        return () => {
+            unsubProducts();
+            unsubWarehouses();
+            unsubReturns();
+        }
+    }, [loading]);
+
+    const lowStockProducts = products.filter(p => p.stock <= p.min_stock);
+
+    const handleAddWarehouse = async () => {
         if (newWarehouseName.trim() === '') return;
-        const newWarehouse = {
-            id: `WH${Date.now()}`,
-            name: newWarehouseName.trim(),
-        };
-        setWarehouses([...warehouses, newWarehouse]);
-        setNewWarehouseName('');
+        try {
+            await addDoc(collection(db, "warehouses"), {
+                name: newWarehouseName.trim(),
+                createdAt: serverTimestamp()
+            });
+            setNewWarehouseName('');
+            toast({ title: "تمت إضافة المستودع بنجاح!" });
+        } catch (error) {
+            toast({ variant: 'destructive', title: "خطأ في إضافة المستودع" });
+        }
     };
 
-    const handleUpdateWarehouse = () => {
+    const handleUpdateWarehouse = async () => {
         if (!editingWarehouse || editingWarehouse.name.trim() === '') return;
-        setWarehouses(
-            warehouses.map((w) =>
-                w.id === editingWarehouse.id ? { ...w, name: editingWarehouse.name.trim() } : w
-            )
-        );
-        setEditingWarehouse(null);
+        try {
+            const warehouseRef = doc(db, "warehouses", editingWarehouse.id);
+            await updateDoc(warehouseRef, { name: editingWarehouse.name.trim() });
+            setEditingWarehouse(null);
+            toast({ title: "تم تحديث المستودع بنجاح!" });
+        } catch (error) {
+            toast({ variant: 'destructive', title: "خطأ في تحديث المستودع" });
+        }
     };
 
-    const handleDeleteWarehouse = (warehouseId: string) => {
-        setWarehouses(warehouses.filter((w) => w.id !== warehouseId));
+    const handleDeleteWarehouse = async (warehouseId: string) => {
+       try {
+            await deleteDoc(doc(db, "warehouses", warehouseId));
+            toast({ title: "تم حذف المستودع بنجاح." });
+       } catch (error) {
+            toast({ variant: 'destructive', title: "خطأ في حذف المستودع" });
+       }
     };
 
 
@@ -94,7 +160,7 @@ export function DashboardPage() {
                 <Boxes className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{products.length}</div>
+                {loading ? <Skeleton className="h-8 w-12" /> : <div className="text-2xl font-bold">{products.length}</div>}
                 <p className="text-xs text-muted-foreground">عرض كل المنتجات</p>
               </CardContent>
             </Card>
@@ -116,7 +182,7 @@ export function DashboardPage() {
                     <TableBody>
                         {products.map((product) => (
                             <TableRow key={product.id}>
-                                <TableCell className="font-mono">{product.id}</TableCell>
+                                <TableCell className="font-mono">{product.id.substring(0, 6)}</TableCell>
                                 <TableCell className="font-medium">{product.name}</TableCell>
                                 <TableCell className="text-right">{product.stock}</TableCell>
                             </TableRow>
@@ -138,7 +204,7 @@ export function DashboardPage() {
                         <Warehouse className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{warehouses.length}</div>
+                        {loading ? <Skeleton className="h-8 w-10" /> : <div className="text-2xl font-bold">{warehouses.length}</div>}
                         <p className="text-xs text-muted-foreground">إدارة المستودعات</p>
                     </CardContent>
                 </Card>
@@ -199,7 +265,7 @@ export function DashboardPage() {
                     <Undo2 className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">{pendingReturns.length}</div>
+                    {loading ? <Skeleton className="h-8 w-10" /> : <div className="text-2xl font-bold">{pendingReturns.length}</div>}
                     <p className="text-xs text-muted-foreground">عرض المرتجعات المعلقة</p>
                   </CardContent>
                 </Card>
@@ -245,7 +311,7 @@ export function DashboardPage() {
                     <AlertCircle className="h-4 w-4 text-accent" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold text-accent">{lowStockProducts.length}</div>
+                    {loading ? <Skeleton className="h-8 w-10" /> : <div className="text-2xl font-bold text-accent">{lowStockProducts.length}</div>}
                     <p className="text-xs text-muted-foreground">عناصر تحتاج لإعادة التخزين</p>
                   </CardContent>
                 </Card>
@@ -285,7 +351,7 @@ export function DashboardPage() {
         <Card>
           <CardHeader>
             <CardTitle className="font-headline">حركة المخزون</CardTitle>
-            <CardDescription>آخر 6 أشهر</CardDescription>
+            <CardDescription>آخر 6 أشهر (بيانات تجريبية)</CardDescription>
           </CardHeader>
           <CardContent>
             <ChartContainer config={chartConfig} className="h-[300px] w-full">
@@ -312,7 +378,7 @@ export function DashboardPage() {
         <Card>
           <CardHeader>
             <CardTitle className="font-headline">النشاط الأخير</CardTitle>
-            <CardDescription>سجل بحركات المخزون الأخيرة.</CardDescription>
+            <CardDescription>سجل بحركات المخزون الأخيرة (بيانات تجريبية).</CardDescription>
           </CardHeader>
           <CardContent>
             <Table>

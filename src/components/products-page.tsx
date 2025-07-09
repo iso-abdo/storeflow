@@ -26,11 +26,14 @@ import {
     FormMessage,
   } from "@/components/ui/form"
 import { Input } from "@/components/ui/input";
-import { products as initialProducts } from '@/lib/data';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { collection, addDoc, query, onSnapshot, orderBy, serverTimestamp } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import { Skeleton } from './ui/skeleton';
+
 
 const productSchema = z.object({
     name: z.string().min(1, { message: "اسم المنتج مطلوب" }),
@@ -42,9 +45,21 @@ const productSchema = z.object({
     imageUrl: z.string().optional(),
 });
 
+interface Product {
+    id: string;
+    name: string;
+    barcode?: string;
+    category?: string;
+    price: number;
+    min_stock: number;
+    stock: number;
+    imageUrl: string;
+}
+
 
 export function ProductsPage() {
-    const [products, setProducts] = useState(initialProducts);
+    const [products, setProducts] = useState<Product[]>([]);
+    const [loading, setLoading] = useState(true);
     const [isAddProductDialogOpen, setIsAddProductDialogOpen] = useState(false);
     const [isCameraDialogOpen, setIsCameraDialogOpen] = useState(false);
     const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
@@ -66,8 +81,21 @@ export function ProductsPage() {
             imageUrl: "",
         },
     });
+    
+    useEffect(() => {
+        const q = query(collection(db, "products"), orderBy("name"));
+        const unsubscribe = onSnapshot(q, (querySnapshot) => {
+            const productsData: Product[] = [];
+            querySnapshot.forEach((doc) => {
+                productsData.push({ id: doc.id, ...doc.data() } as Product);
+            });
+            setProducts(productsData);
+            setLoading(false);
+        });
 
-    // Reset captured image when add product dialog is closed
+        return () => unsubscribe();
+    }, []);
+
     useEffect(() => {
         if (!isAddProductDialogOpen) {
             setCapturedImage(null);
@@ -76,7 +104,6 @@ export function ProductsPage() {
     }, [isAddProductDialogOpen, form]);
 
 
-    // Handle camera access
     useEffect(() => {
         if (isCameraDialogOpen) {
             const getCameraPermission = async () => {
@@ -121,19 +148,28 @@ export function ProductsPage() {
         }
     };
 
-    function onSubmit(values: z.infer<typeof productSchema>) {
-        const newProduct = {
-            id: `PROD${(products.length + 1).toString().padStart(3, '0')}`,
-            name: values.name,
-            barcode: values.barcode || '',
-            category: values.category || '',
-            price: values.price,
-            min_stock: values.min_stock || 0,
-            stock: values.stock || 0,
-            imageUrl: capturedImage || "https://placehold.co/400x400.png",
-        };
-        setProducts([...products, newProduct]);
-        setIsAddProductDialogOpen(false);
+    async function onSubmit(values: z.infer<typeof productSchema>) {
+        try {
+            await addDoc(collection(db, "products"), {
+                name: values.name,
+                barcode: values.barcode || '',
+                category: values.category || '',
+                price: values.price,
+                min_stock: values.min_stock || 0,
+                stock: values.stock || 0,
+                imageUrl: capturedImage || "https://placehold.co/400x400.png",
+                createdAt: serverTimestamp(),
+            });
+            toast({ title: "تمت إضافة المنتج بنجاح!" });
+            setIsAddProductDialogOpen(false);
+        } catch (error) {
+            console.error("Error adding document: ", error);
+            toast({
+                variant: 'destructive',
+                title: 'خطأ في إضافة المنتج',
+                description: 'حدث خطأ ما، يرجى المحاولة مرة أخرى.',
+            });
+        }
     }
 
     return (
@@ -281,7 +317,19 @@ export function ProductsPage() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {products.map((product) => (
+                                {loading ? (
+                                    Array.from({ length: 5 }).map((_, i) => (
+                                        <TableRow key={i}>
+                                            <TableCell><Skeleton className="h-10 w-10 rounded-md" /></TableCell>
+                                            <TableCell><Skeleton className="h-4 w-[250px]" /></TableCell>
+                                            <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
+                                            <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
+                                            <TableCell><Skeleton className="h-4 w-[80px]" /></TableCell>
+                                            <TableCell><Skeleton className="h-4 w-[80px] mx-auto" /></TableCell>
+                                            <TableCell className="text-right"><Skeleton className="h-4 w-[80px] ml-auto" /></TableCell>
+                                        </TableRow>
+                                    ))
+                                ) : products.map((product) => (
                                     <TableRow key={product.id}>
                                         <TableCell>
                                             <Image
@@ -298,7 +346,7 @@ export function ProductsPage() {
                                                 {product.name}
                                             </Link>
                                         </TableCell>
-                                        <TableCell className="font-mono">{product.id}</TableCell>
+                                        <TableCell className="font-mono">{product.id.substring(0,6)}</TableCell>
                                         <TableCell>{product.category}</TableCell>
                                         <TableCell>{product.price.toFixed(2)} ج.م</TableCell>
                                         <TableCell className="text-center">{product.min_stock}</TableCell>

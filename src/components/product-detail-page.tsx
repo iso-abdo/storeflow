@@ -1,15 +1,84 @@
 'use client';
 
-import { products } from "@/lib/data";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { Button } from "./ui/button";
+import { useEffect, useState } from "react";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import { Skeleton } from "./ui/skeleton";
+
+interface Product {
+    id: string;
+    name: string;
+    barcode?: string;
+    category?: string;
+    price: number;
+    min_stock: number;
+    stock: number;
+    imageUrl: string;
+}
 
 export function ProductDetailPage({ productId }: { productId: string }) {
-    const product = products.find(p => p.id === productId);
+    const [product, setProduct] = useState<Product | null>(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchProduct = async () => {
+            if (!productId) {
+                setLoading(false);
+                return;
+            };
+            try {
+                const docRef = doc(db, "products", productId);
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    setProduct({ id: docSnap.id, ...docSnap.data() } as Product);
+                } else {
+                    console.log("No such document!");
+                }
+            } catch (error) {
+                console.error("Error fetching product:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchProduct();
+    }, [productId]);
+
+
+    if (loading) {
+        return (
+            <div className="flex flex-col gap-6">
+                 <div className="flex items-center gap-4">
+                    <Skeleton className="h-10 w-10" />
+                    <Skeleton className="h-9 w-[250px]" />
+                </div>
+                <Card>
+                    <CardContent className="p-6 grid md:grid-cols-2 gap-8">
+                        <Skeleton className="w-full h-[400px] rounded-lg" />
+                        <div className="flex flex-col gap-4 justify-center">
+                            <CardHeader className="p-0 space-y-4">
+                                <Skeleton className="h-10 w-3/4" />
+                                <Skeleton className="h-6 w-1/4" />
+                            </CardHeader>
+                            <Skeleton className="h-10 w-1/2" />
+                            <div className="grid grid-cols-2 gap-x-6 gap-y-4 text-sm pt-4">
+                                <div className="space-y-2"><Skeleton className="h-4 w-20" /><Skeleton className="h-6 w-24" /></div>
+                                <div className="space-y-2"><Skeleton className="h-4 w-20" /><Skeleton className="h-6 w-24" /></div>
+                                <div className="space-y-2"><Skeleton className="h-4 w-20" /><Skeleton className="h-8 w-16" /></div>
+                                <div className="space-y-2"><Skeleton className="h-4 w-20" /><Skeleton className="h-8 w-16" /></div>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+        )
+    }
 
     if (!product) {
         notFound();
@@ -48,7 +117,7 @@ export function ProductDetailPage({ productId }: { productId: string }) {
                         <div className="grid grid-cols-2 gap-x-6 gap-y-4 text-sm pt-4">
                             <div>
                                 <p className="text-muted-foreground">الرمز (ID)</p>
-                                <p className="font-mono text-base">{product.id}</p>
+                                <p className="font-mono text-base">{product.id.substring(0, 6)}</p>
                             </div>
                             <div>
                                 <p className="text-muted-foreground">الباركود</p>

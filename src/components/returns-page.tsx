@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -41,7 +41,24 @@ import {
     TableRow,
   } from "@/components/ui/table";
 import { Badge } from './ui/badge';
-import { products, returns as initialReturns } from '@/lib/data';
+import { collection, onSnapshot, query, orderBy, addDoc, serverTimestamp, doc, updateDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import { useToast } from '@/hooks/use-toast';
+import { Skeleton } from './ui/skeleton';
+
+interface Product {
+    id: string;
+    name: string;
+}
+interface Return {
+    id: string;
+    invoiceId: string;
+    product: string;
+    quantity: number;
+    reason: string;
+    status: 'قيد الانتظار' | 'تمت الموافقة' | 'مرفوض';
+    date: string;
+}
 
 
 const returnSchema = z.object({
@@ -55,37 +72,70 @@ const currentUserRole = 'admin';
 
 
 export function ReturnsPage() {
-    const [returns, setReturns] = useState(initialReturns);
+    const [returns, setReturns] = useState<Return[]>([]);
+    const [products, setProducts] = useState<Product[]>([]);
+    const [loading, setLoading] = useState(true);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
+    const { toast } = useToast();
 
     const form = useForm<z.infer<typeof returnSchema>>({
         resolver: zodResolver(returnSchema),
         defaultValues: { invoiceId: "", productId: "", quantity: 1, reason: "" },
     });
 
-    function onSubmit(values: z.infer<typeof returnSchema>) {
+    useEffect(() => {
+        const qReturns = query(collection(db, "returns"), orderBy("createdAt", "desc"));
+        const qProducts = query(collection(db, "products"), orderBy("name"));
+
+        const unsubReturns = onSnapshot(qReturns, (snap) => {
+            setReturns(snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Return)));
+            if (loading) setLoading(false);
+        });
+        const unsubProducts = onSnapshot(qProducts, (snap) => {
+            setProducts(snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product)));
+        });
+
+        return () => {
+            unsubReturns();
+            unsubProducts();
+        }
+    }, [loading]);
+
+    async function onSubmit(values: z.infer<typeof returnSchema>) {
         const product = products.find(p => p.id === values.productId);
         if (!product) return;
 
-        const newReturn = {
-            id: `RET${(returns.length + 1).toString().padStart(3, '0')}`,
-            invoiceId: values.invoiceId,
-            product: product.name,
-            quantity: values.quantity,
-            reason: values.reason,
-            status: 'قيد الانتظار',
-            date: new Date().toISOString().split('T')[0],
-        };
-        setReturns(prevReturns => [newReturn, ...prevReturns]);
-        form.reset();
-        setIsDialogOpen(false);
+        try {
+            await addDoc(collection(db, "returns"), {
+                invoiceId: values.invoiceId,
+                product: product.name,
+                productId: product.id,
+                quantity: values.quantity,
+                reason: values.reason,
+                status: 'قيد الانتظار',
+                date: new Date().toISOString().split('T')[0],
+                createdAt: serverTimestamp()
+            });
+            toast({ title: "تم إنشاء طلب الإرجاع بنجاح!" });
+            form.reset();
+            setIsDialogOpen(false);
+        } catch (error) {
+            toast({ variant: 'destructive', title: "خطأ في إنشاء الطلب" });
+            console.error(error);
+        }
     }
     
-    const handleStatusChange = (returnId: string, newStatus: 'تمت الموافقة' | 'مرفوض') => {
-        setReturns(returns.map(r => 
-            r.id === returnId ? { ...r, status: newStatus } : r
-        ));
+    const handleStatusChange = async (returnId: string, newStatus: 'تمت الموافقة' | 'مرفوض') => {
+        const returnRef = doc(db, 'returns', returnId);
+        try {
+            await updateDoc(returnRef, { status: newStatus });
+            // TODO: On approval, trigger stock update transaction
+            toast({ title: `تم تحديث حالة الطلب إلى "${newStatus}"` });
+        } catch (error) {
+            toast({ variant: 'destructive', title: 'فشل تحديث الحالة' });
+            console.error(error);
+        }
     };
 
     const filteredReturns = returns.filter(ret => 
@@ -214,9 +264,22 @@ export function ReturnsPage() {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {filteredReturns.map((ret) => (
+                {loading ? (
+                    Array.from({length: 5}).map((_, i) => (
+                        <TableRow key={i}>
+                            <TableCell><Skeleton className="h-4 w-[80px]" /></TableCell>
+                            <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
+                            <TableCell><Skeleton className="h-4 w-[150px]" /></TableCell>
+                            <TableCell><Skeleton className="h-4 w-[50px]" /></TableCell>
+                            <TableCell><Skeleton className="h-4 w-[80px]" /></TableCell>
+                            <TableCell><Skeleton className="h-6 w-[100px]" /></TableCell>
+                            <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
+                            <TableCell className="text-right"><Skeleton className="h-8 w-[70px] ml-auto" /></TableCell>
+                        </TableRow>
+                    ))
+                ) : filteredReturns.map((ret) => (
                         <TableRow key={ret.id}>
-                            <TableCell className="font-mono">{ret.id}</TableCell>
+                            <TableCell className="font-mono">{ret.id.substring(0,6)}</TableCell>
                             <TableCell>{ret.invoiceId}</TableCell>
                             <TableCell className="font-medium">{ret.product}</TableCell>
                             <TableCell>{ret.quantity}</TableCell>

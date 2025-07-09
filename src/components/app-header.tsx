@@ -13,36 +13,67 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import Image from 'next/image';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from './ui/command';
 import { useRouter } from 'next/navigation';
-import { products } from '@/lib/data';
 import { signOut } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import { auth, db } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
+import { collection, onSnapshot, query, where } from 'firebase/firestore';
 
-
-const notifications = [
-    { type: 'low_stock', product: 'لوحة مفاتيح ميكانيكية' },
-    { type: 'pending_return', product: 'شاشة 4K' },
-    { type: 'low_stock', product: 'فأرة لاسلكية' },
-];
-
+interface Product {
+    id: string;
+    name: string;
+}
+interface Return {
+    id: string;
+    product: string;
+    status: string;
+}
 
 export function AppHeader() {
-  const [open, setOpen] = React.useState(false);
-  const [search, setSearch] = React.useState("");
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
   const router = useRouter();
   const { toast } = useToast();
+  
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
+  const [lowStockProducts, setLowStockProducts] = useState<Product[]>([]);
+  const [pendingReturns, setPendingReturns] = useState<Return[]>([]);
+
+  useEffect(() => {
+    const productsQuery = query(collection(db, 'products'));
+    const unsubscribeProducts = onSnapshot(productsQuery, (snapshot) => {
+        const productsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+        setAllProducts(productsData);
+
+        const lowStock = snapshot.docs
+            .map(doc => ({ ...doc.data(), id: doc.id }))
+            .filter(product => product.stock <= product.min_stock) as Product[];
+        setLowStockProducts(lowStock);
+    });
+
+    const returnsQuery = query(collection(db, 'returns'), where('status', '==', 'قيد الانتظار'));
+    const unsubscribeReturns = onSnapshot(returnsQuery, (snapshot) => {
+        const returnsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Return));
+        setPendingReturns(returnsData);
+    });
+    
+    return () => {
+        unsubscribeProducts();
+        unsubscribeReturns();
+    };
+  }, []);
+
 
   const filteredProducts = search
-    ? products.filter((product) =>
+    ? allProducts.filter((product) =>
         product.name.toLowerCase().includes(search.toLowerCase())
       )
     : [];
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (search.length > 0) {
       setOpen(true);
     } else {
@@ -69,6 +100,12 @@ export function AppHeader() {
       });
     }
   };
+
+  const notifications = [
+    ...lowStockProducts.map(p => ({ type: 'low_stock', product: p.name, id: `ls-${p.id}` })),
+    ...pendingReturns.map(r => ({ type: 'pending_return', product: r.product, id: `pr-${r.id}` }))
+  ];
+
 
   return (
     <header className="sticky top-0 z-20 flex h-14 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm lg:h-[60px] lg:px-6">
@@ -134,8 +171,8 @@ export function AppHeader() {
           <DropdownMenuLabel>الإشعارات</DropdownMenuLabel>
           <DropdownMenuSeparator />
           {notifications.length > 0 ? (
-            notifications.map((notification, index) => (
-              <DropdownMenuItem key={index} className="gap-3">
+            notifications.map((notification) => (
+              <DropdownMenuItem key={notification.id} className="gap-3">
                 {notification.type === 'low_stock' ? (
                   <AlertCircle className="h-4 w-4 text-accent" />
                 ) : (
