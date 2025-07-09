@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -87,10 +86,26 @@ export default function LoginPage() {
       toast({ title: "تم إنشاء الحساب بنجاح!" });
       router.push('/');
     } catch (error: any) {
+      let description = 'حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.';
+      if (error.code) {
+        switch (error.code) {
+          case 'auth/weak-password':
+            description = 'كلمة المرور ضعيفة جدًا. يجب أن تتكون من 6 أحرف على الأقل.';
+            break;
+          case 'auth/email-already-in-use':
+            description = 'هذا البريد الإلكتروني مسجل بالفعل.';
+            break;
+          case 'auth/invalid-email':
+            description = 'صيغة البريد الإلكتروني غير صحيحة.';
+            break;
+          default:
+            description = 'فشل إنشاء الحساب. يرجى التحقق من البيانات والمحاولة مرة أخرى.';
+        }
+      }
       toast({
         variant: 'destructive',
         title: 'خطأ في إنشاء الحساب',
-        description: error.message,
+        description: description,
       });
     } finally {
       setLoading(false);
@@ -105,10 +120,24 @@ export default function LoginPage() {
       toast({ title: "تم تسجيل الدخول بنجاح!" });
       router.push('/');
     } catch (error: any) {
+        let description = 'حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.';
+        switch (error.code) {
+          case 'auth/invalid-credential':
+          case 'auth/user-not-found':
+          case 'auth/wrong-password':
+            description = 'البريد الإلكتروني أو كلمة المرور غير صحيحة.';
+            break;
+          case 'auth/invalid-email':
+            description = 'صيغة البريد الإلكتروني المدخلة غير صحيحة.';
+            break;
+          case 'auth/too-many-requests':
+            description = 'تم حظر الوصول مؤقتًا بسبب كثرة المحاولات الفاشلة.';
+            break;
+        }
         toast({
             variant: 'destructive',
             title: 'خطأ في تسجيل الدخول',
-            description: 'البريد الإلكتروني أو كلمة المرور غير صحيحة.',
+            description,
         });
     } finally {
       setLoading(false);
