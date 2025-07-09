@@ -59,7 +59,7 @@ interface Warehouse {
 interface Movement {
     id: string;
     product: string;
-    type: 'إدخال' | 'إخراج' | 'تحويل';
+    type: 'إدخال' | 'إخراج' | 'تحويل' | 'مرتجع';
     quantity: number;
     warehouse: string;
     date: string;
@@ -313,7 +313,11 @@ export function InventoryPage() {
                             <TableRow key={mov.id}>
                                 <TableCell className="font-medium">{mov.product}</TableCell>
                                 <TableCell>
-                                    <Badge variant={mov.type === 'إدخال' ? 'default' : mov.type === 'إخراج' ? 'destructive' : 'secondary'}>
+                                    <Badge variant={
+                                        mov.type === 'إدخال' || mov.type === 'مرتجع' ? 'default' 
+                                        : mov.type === 'إخراج' ? 'destructive' 
+                                        : 'secondary'
+                                    }>
                                         {mov.type}
                                     </Badge>
                                 </TableCell>

@@ -205,8 +205,8 @@ export function AppHeader() {
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>حسابي</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem>الإعدادات</DropdownMenuItem>
-          <DropdownMenuItem>الدعم</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => toast({ title: 'غير متاح حالياً', description: 'سيتم إضافة هذه الميزة قريباً.' })}>الإعدادات</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => toast({ title: 'غير متاح حالياً', description: 'سيتم إضافة هذه الميزة قريباً.' })}>الدعم</DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={handleSignOut}>
             <LogOut className="mr-2 h-4 w-4" />

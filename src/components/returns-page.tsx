@@ -41,7 +41,7 @@ import {
     TableRow,
   } from "@/components/ui/table";
 import { Badge } from './ui/badge';
-import { collection, onSnapshot, query, orderBy, addDoc, serverTimestamp, doc, updateDoc } from 'firebase/firestore';
+import { collection, onSnapshot, query, orderBy, addDoc, serverTimestamp, doc, updateDoc, runTransaction } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from './ui/skeleton';
@@ -54,6 +54,7 @@ interface Return {
     id: string;
     invoiceId: string;
     product: string;
+    productId: string;
     quantity: number;
     reason: string;
     status: 'قيد الانتظار' | 'تمت الموافقة' | 'مرفوض';
@@ -127,14 +128,67 @@ export function ReturnsPage() {
     }
     
     const handleStatusChange = async (returnId: string, newStatus: 'تمت الموافقة' | 'مرفوض') => {
+        const returnToUpdate = returns.find(r => r.id === returnId);
+        if (!returnToUpdate) {
+            toast({ variant: 'destructive', title: 'لم يتم العثور على طلب الإرجاع' });
+            return;
+        }
+    
         const returnRef = doc(db, 'returns', returnId);
-        try {
-            await updateDoc(returnRef, { status: newStatus });
-            // TODO: On approval, trigger stock update transaction
-            toast({ title: `تم تحديث حالة الطلب إلى "${newStatus}"` });
-        } catch (error) {
-            toast({ variant: 'destructive', title: 'فشل تحديث الحالة' });
-            console.error(error);
+    
+        // If just rejecting, a simple update is fine.
+        if (newStatus === 'مرفوض') {
+            try {
+                await updateDoc(returnRef, { status: newStatus });
+                toast({ title: `تم تحديث حالة الطلب إلى "${newStatus}"` });
+            } catch (error) {
+                toast({ variant: 'destructive', title: 'فشل تحديث الحالة', description: String(error) });
+                console.error(error);
+            }
+            return;
+        }
+    
+        // If approving, use a transaction to update stock and return status.
+        if (newStatus === 'تمت الموافقة') {
+            try {
+                await runTransaction(db, async (transaction) => {
+                    const productRef = doc(db, "products", returnToUpdate.productId);
+                    
+                    const returnDoc = await transaction.get(returnRef);
+                    const productDoc = await transaction.get(productRef);
+    
+                    if (!returnDoc.exists() || !productDoc.exists()) {
+                        throw "المنتج أو طلب الإرجاع غير موجود!";
+                    }
+                    
+                    if (returnDoc.data().status !== 'قيد الانتظار') {
+                        throw "تمت معالجة هذا الطلب بالفعل.";
+                    }
+    
+                    // 1. Update product stock
+                    const currentStock = productDoc.data().stock;
+                    const newStock = currentStock + returnToUpdate.quantity;
+                    transaction.update(productRef, { stock: newStock });
+    
+                    // 2. Update return status
+                    transaction.update(returnRef, { status: newStatus });
+    
+                    // 3. Log the stock movement
+                    const movementData = {
+                        product: returnToUpdate.product,
+                        type: 'مرتجع',
+                        quantity: returnToUpdate.quantity,
+                        warehouse: 'مستودع المرتجعات', // Generic warehouse for returns
+                        date: new Date().toISOString().split('T')[0],
+                        createdAt: serverTimestamp()
+                    };
+                    transaction.set(doc(collection(db, "movements")), movementData);
+                });
+                toast({ title: `تمت الموافقة على طلب الإرجاع وتحديث المخزون` });
+            } catch (e) {
+                console.error("Transaction failed: ", e);
+                toast({ variant: 'destructive', title: 'فشلت العملية', description: String(e) });
+            }
         }
     };
 

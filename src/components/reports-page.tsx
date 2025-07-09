@@ -190,7 +190,7 @@ export function ReportsPage() {
                                     <TableCell className="font-medium">{item.product}</TableCell>
                                     <TableCell>{item.warehouse}</TableCell>
                                     <TableCell>
-                                        <Badge variant={item.type === 'إدخال' ? 'default' : item.type === 'إخراج' ? 'destructive' : 'secondary'}>{item.type}</Badge>
+                                        <Badge variant={item.type === 'إدخال' || item.type === 'مرتجع' ? 'default' : item.type === 'إخراج' ? 'destructive' : 'secondary'}>{item.type}</Badge>
                                     </TableCell>
                                     <TableCell>{new Date(item.date).toLocaleDateString('ar-EG')}</TableCell>
                                     <TableCell className="text-right font-mono">{item.quantity}</TableCell>
