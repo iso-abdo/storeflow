@@ -42,7 +42,7 @@ import {
   } from "@/components/ui/table";
 import { Badge } from './ui/badge';
 import { collection, onSnapshot, query, orderBy, runTransaction, doc, addDoc, serverTimestamp, getDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { db, auth } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from './ui/skeleton';
 
@@ -63,12 +63,15 @@ interface Movement {
     quantity: number;
     warehouse: string;
     date: string;
+    createdBy: string;
+    recipient: string;
 }
 
 const stockMovementSchema = z.object({
     productId: z.string().min(1, { message: "الرجاء اختيار منتج" }),
     warehouseId: z.string().min(1, { message: "الرجاء اختيار المستودع" }),
     quantity: z.coerce.number().int().min(1, { message: "الكمية يجب أن تكون 1 على الأقل" }),
+    recipient: z.string().min(2, { message: "حقل 'لصالح من' مطلوب" }),
 });
 
 const stockTransferSchema = z.object({
@@ -76,6 +79,7 @@ const stockTransferSchema = z.object({
     quantity: z.coerce.number().int().min(1, { message: "الكمية يجب أن تكون 1 على الأقل" }),
     fromWarehouseId: z.string().min(1, { message: "الرجاء اختيار المستودع المصدر" }),
     toWarehouseId: z.string().min(1, { message: "الرجاء اختيار المستودع الهدف" }),
+    recipient: z.string().min(2, { message: "حقل 'لصالح من' مطلوب" }),
 }).refine(data => data.fromWarehouseId !== data.toWarehouseId, {
     message: "لا يمكن التحويل إلى نفس المستودع",
     path: ["toWarehouseId"],
@@ -96,15 +100,15 @@ export function InventoryPage() {
 
     const formIn = useForm<z.infer<typeof stockMovementSchema>>({
         resolver: zodResolver(stockMovementSchema),
-        defaultValues: { productId: "", warehouseId: "", quantity: 1 },
+        defaultValues: { productId: "", warehouseId: "", quantity: 1, recipient: "" },
     });
     const formOut = useForm<z.infer<typeof stockMovementSchema>>({
         resolver: zodResolver(stockMovementSchema),
-        defaultValues: { productId: "", warehouseId: "", quantity: 1 },
+        defaultValues: { productId: "", warehouseId: "", quantity: 1, recipient: "" },
     });
     const formTransfer = useForm<z.infer<typeof stockTransferSchema>>({
         resolver: zodResolver(stockTransferSchema),
-        defaultValues: { productId: "", quantity: 1, fromWarehouseId: "", toWarehouseId: "" },
+        defaultValues: { productId: "", quantity: 1, fromWarehouseId: "", toWarehouseId: "", recipient: "" },
     });
 
     useEffect(() => {
@@ -132,6 +136,12 @@ export function InventoryPage() {
 
 
     async function handleMovement(type: 'إدخال' | 'إخراج', values: z.infer<typeof stockMovementSchema>) {
+        const currentUser = auth.currentUser;
+        if (!currentUser) {
+            toast({ variant: 'destructive', title: 'خطأ', description: 'يجب أن تكون مسجلاً للدخول لتنفيذ هذه العملية.' });
+            return;
+        }
+
         const product = products.find(p => p.id === values.productId);
         const warehouse = warehouses.find(w => w.id === values.warehouseId);
         if (!product || !warehouse) return;
@@ -155,7 +165,9 @@ export function InventoryPage() {
                     quantity: values.quantity,
                     warehouse: warehouse.name,
                     date: new Date().toISOString().split('T')[0],
-                    createdAt: serverTimestamp()
+                    createdAt: serverTimestamp(),
+                    recipient: values.recipient,
+                    createdBy: currentUser.email || 'System',
                 };
                 transaction.set(doc(collection(db, "movements")), movementData);
             });
@@ -170,6 +182,12 @@ export function InventoryPage() {
     }
 
     async function handleTransfer(values: z.infer<typeof stockTransferSchema>) {
+        const currentUser = auth.currentUser;
+        if (!currentUser) {
+            toast({ variant: 'destructive', title: 'خطأ', description: 'يجب أن تكون مسجلاً للدخول لتنفيذ هذه العملية.' });
+            return;
+        }
+        
         const product = products.find(p => p.id === values.productId);
         const fromWarehouse = warehouses.find(w => w.id === values.fromWarehouseId);
         const toWarehouse = warehouses.find(w => w.id === values.toWarehouseId);
@@ -184,16 +202,15 @@ export function InventoryPage() {
                 const currentStock = productDoc.data().stock;
                 if (currentStock < values.quantity) throw "لا يوجد مخزون كافي للتحويل!";
                 
-                // Note: In a real multi-warehouse scenario, you'd track stock per warehouse.
-                // Here we just log the movement as the stock is global for the product.
-                
                 const movementData = {
                     product: product.name,
                     type: 'تحويل',
                     quantity: values.quantity,
                     warehouse: `من ${fromWarehouse.name} إلى ${toWarehouse.name}`,
                     date: new Date().toISOString().split('T')[0],
-                    createdAt: serverTimestamp()
+                    createdAt: serverTimestamp(),
+                    recipient: values.recipient,
+                    createdBy: currentUser.email || 'System',
                 };
                 transaction.set(doc(collection(db, "movements")), movementData);
             });
@@ -278,6 +295,19 @@ export function InventoryPage() {
                                         </FormItem>
                                     )}
                                 />
+                                <FormField
+                                    control={formIn.control}
+                                    name="recipient"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>لصالح من (المورد)</FormLabel>
+                                            <FormControl>
+                                                <Input placeholder="اسم المورد" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
                                 <DialogFooter>
                                     <Button type="submit">حفظ</Button>
                                 </DialogFooter>
@@ -348,6 +378,19 @@ export function InventoryPage() {
                                             <FormLabel>الكمية</FormLabel>
                                             <FormControl>
                                                 <Input type="number" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={formOut.control}
+                                    name="recipient"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>لصالح من (العميل)</FormLabel>
+                                            <FormControl>
+                                                <Input placeholder="اسم العميل" {...field} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -448,6 +491,19 @@ export function InventoryPage() {
                                         </FormItem>
                                     )}
                                 />
+                                <FormField
+                                    control={formTransfer.control}
+                                    name="recipient"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>لصالح من (المستلم)</FormLabel>
+                                            <FormControl>
+                                                <Input placeholder="اسم المستلم في المستودع الهدف" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
                                 <DialogFooter>
                                     <Button type="submit">تحويل</Button>
                                 </DialogFooter>
@@ -469,6 +525,8 @@ export function InventoryPage() {
                             <TableHead>المنتج</TableHead>
                             <TableHead>النوع</TableHead>
                             <TableHead>المستودع/الوجهة</TableHead>
+                            <TableHead>بواسطة</TableHead>
+                            <TableHead>لصالح من</TableHead>
                             <TableHead className="text-right">الكمية</TableHead>
                             <TableHead className="text-right">التاريخ</TableHead>
                         </TableRow>
@@ -480,6 +538,8 @@ export function InventoryPage() {
                                     <TableCell><Skeleton className="h-4 w-[150px]" /></TableCell>
                                     <TableCell><Skeleton className="h-4 w-[80px]" /></TableCell>
                                     <TableCell><Skeleton className="h-4 w-[200px]" /></TableCell>
+                                    <TableCell><Skeleton className="h-4 w-[150px]" /></TableCell>
+                                    <TableCell><Skeleton className="h-4 w-[150px]" /></TableCell>
                                     <TableCell className="text-right"><Skeleton className="h-4 w-[50px] ml-auto" /></TableCell>
                                     <TableCell className="text-right"><Skeleton className="h-4 w-[100px] ml-auto" /></TableCell>
                                 </TableRow>
@@ -497,6 +557,8 @@ export function InventoryPage() {
                                     </Badge>
                                 </TableCell>
                                 <TableCell>{mov.warehouse}</TableCell>
+                                <TableCell>{mov.createdBy}</TableCell>
+                                <TableCell>{mov.recipient}</TableCell>
                                 <TableCell className="text-right">{mov.quantity}</TableCell>
                                 <TableCell className="text-right">{mov.date}</TableCell>
                             </TableRow>
