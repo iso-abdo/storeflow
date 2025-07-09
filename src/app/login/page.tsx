@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
+import { AuthGuard } from '@/components/auth-guard';
 
 function Logo() {
     return (
@@ -76,11 +77,10 @@ export default function LoginPage() {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
       
-      // Add user to Firestore
       await setDoc(doc(db, "users", user.uid), {
         uid: user.uid,
         email: user.email,
-        role: 'Employee', // Default role
+        role: 'Employee', 
         createdAt: serverTimestamp()
       });
 
@@ -116,64 +116,66 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-4">
-      <div className="w-full max-w-md space-y-4">
-        <div className="flex justify-center">
-            <Logo />
+    <AuthGuard>
+        <div className="flex min-h-screen items-center justify-center bg-background p-4">
+          <div className="w-full max-w-md space-y-4">
+            <div className="flex justify-center">
+                <Logo />
+            </div>
+            <Tabs defaultValue="signin" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="signin">تسجيل الدخول</TabsTrigger>
+                <TabsTrigger value="signup">إنشاء حساب</TabsTrigger>
+              </TabsList>
+              <TabsContent value="signin">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>تسجيل الدخول</CardTitle>
+                    <CardDescription>أدخل بريدك الإلكتروني وكلمة المرور للوصول إلى حسابك.</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <form onSubmit={handleSignIn} className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="signin-email">البريد الإلكتروني</Label>
+                        <Input id="signin-email" type="email" placeholder="m@example.com" required value={email} onChange={(e) => setEmail(e.target.value)} />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="signin-password">كلمة المرور</Label>
+                        <Input id="signin-password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} />
+                      </div>
+                      <Button type="submit" className="w-full" disabled={loading}>
+                        {loading ? 'جاري الدخول...' : 'تسجيل الدخول'}
+                      </Button>
+                    </form>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+              <TabsContent value="signup">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>إنشاء حساب</CardTitle>
+                    <CardDescription>املأ النموذج أدناه لإنشاء حساب جديد.</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <form onSubmit={handleSignUp} className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="signup-email">البريد الإلكتروني</Label>
+                        <Input id="signup-email" type="email" placeholder="m@example.com" required value={email} onChange={(e) => setEmail(e.target.value)} />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="signup-password">كلمة المرور</Label>
+                        <Input id="signup-password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} />
+                      </div>
+                      <Button type="submit" className="w-full" disabled={loading}>
+                         {loading ? 'جاري الإنشاء...' : 'إنشاء حساب'}
+                      </Button>
+                    </form>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
+          </div>
         </div>
-        <Tabs defaultValue="signin" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="signin">تسجيل الدخول</TabsTrigger>
-            <TabsTrigger value="signup">إنشاء حساب</TabsTrigger>
-          </TabsList>
-          <TabsContent value="signin">
-            <Card>
-              <CardHeader>
-                <CardTitle>تسجيل الدخول</CardTitle>
-                <CardDescription>أدخل بريدك الإلكتروني وكلمة المرور للوصول إلى حسابك.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleSignIn} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="signin-email">البريد الإلكتروني</Label>
-                    <Input id="signin-email" type="email" placeholder="m@example.com" required value={email} onChange={(e) => setEmail(e.target.value)} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signin-password">كلمة المرور</Label>
-                    <Input id="signin-password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} />
-                  </div>
-                  <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? 'جاري الدخول...' : 'تسجيل الدخول'}
-                  </Button>
-                </form>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          <TabsContent value="signup">
-            <Card>
-              <CardHeader>
-                <CardTitle>إنشاء حساب</CardTitle>
-                <CardDescription>املأ النموذج أدناه لإنشاء حساب جديد.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleSignUp} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-email">البريد الإلكتروني</Label>
-                    <Input id="signup-email" type="email" placeholder="m@example.com" required value={email} onChange={(e) => setEmail(e.target.value)} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-password">كلمة المرور</Label>
-                    <Input id="signup-password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} />
-                  </div>
-                  <Button type="submit" className="w-full" disabled={loading}>
-                     {loading ? 'جاري الإنشاء...' : 'إنشاء حساب'}
-                  </Button>
-                </form>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-      </div>
-    </div>
+    </AuthGuard>
   );
 }
