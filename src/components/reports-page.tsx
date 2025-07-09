@@ -40,8 +40,6 @@ interface Movement {
     quantity: number;
     warehouse: string;
     date: string;
-    createdBy: string;
-    recipient: string;
 }
 interface Return {
     id: string;
@@ -176,8 +174,6 @@ export function ReportsPage() {
                                 <TableHead>المنتج</TableHead>
                                 <TableHead>المستودع/الوجهة</TableHead>
                                 <TableHead>النوع</TableHead>
-                                <TableHead>بواسطة</TableHead>
-                                <TableHead>لصالح من</TableHead>
                                 <TableHead>التاريخ</TableHead>
                                 <TableHead className="text-right">الكمية</TableHead>
                             </TableRow>
@@ -186,7 +182,7 @@ export function ReportsPage() {
                             {loading ? (
                                 Array.from({length: 5}).map((_, i) => (
                                     <TableRow key={i}>
-                                        <TableCell colSpan={7}><Skeleton className="h-4 w-full" /></TableCell>
+                                        <TableCell colSpan={5}><Skeleton className="h-4 w-full" /></TableCell>
                                     </TableRow>
                                 ))
                             ) : filteredMovements.map((item) => (
@@ -196,8 +192,6 @@ export function ReportsPage() {
                                     <TableCell>
                                         <Badge variant={item.type === 'إدخال' || item.type === 'مرتجع' ? 'default' : item.type === 'إخراج' ? 'destructive' : 'secondary'}>{item.type}</Badge>
                                     </TableCell>
-                                    <TableCell>{item.createdBy}</TableCell>
-                                    <TableCell>{item.recipient}</TableCell>
                                     <TableCell>{new Date(item.date).toLocaleDateString('ar-EG')}</TableCell>
                                     <TableCell className="text-right font-mono">{item.quantity}</TableCell>
                                 </TableRow>

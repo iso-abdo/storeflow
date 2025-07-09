@@ -63,15 +63,12 @@ interface Movement {
     quantity: number;
     warehouse: string;
     date: string;
-    createdBy: string;
-    recipient: string;
 }
 
 const stockMovementSchema = z.object({
     productId: z.string().min(1, { message: "الرجاء اختيار منتج" }),
     warehouseId: z.string().min(1, { message: "الرجاء اختيار المستودع" }),
     quantity: z.coerce.number().int().min(1, { message: "الكمية يجب أن تكون 1 على الأقل" }),
-    recipient: z.string().min(2, { message: "حقل 'لصالح من' مطلوب" }),
 });
 
 const stockTransferSchema = z.object({
@@ -79,7 +76,6 @@ const stockTransferSchema = z.object({
     quantity: z.coerce.number().int().min(1, { message: "الكمية يجب أن تكون 1 على الأقل" }),
     fromWarehouseId: z.string().min(1, { message: "الرجاء اختيار المستودع المصدر" }),
     toWarehouseId: z.string().min(1, { message: "الرجاء اختيار المستودع الهدف" }),
-    recipient: z.string().min(2, { message: "حقل 'لصالح من' مطلوب" }),
 }).refine(data => data.fromWarehouseId !== data.toWarehouseId, {
     message: "لا يمكن التحويل إلى نفس المستودع",
     path: ["toWarehouseId"],
@@ -100,15 +96,15 @@ export function InventoryPage() {
 
     const formIn = useForm<z.infer<typeof stockMovementSchema>>({
         resolver: zodResolver(stockMovementSchema),
-        defaultValues: { productId: "", warehouseId: "", quantity: 1, recipient: "" },
+        defaultValues: { productId: "", warehouseId: "", quantity: 1 },
     });
     const formOut = useForm<z.infer<typeof stockMovementSchema>>({
         resolver: zodResolver(stockMovementSchema),
-        defaultValues: { productId: "", warehouseId: "", quantity: 1, recipient: "" },
+        defaultValues: { productId: "", warehouseId: "", quantity: 1 },
     });
     const formTransfer = useForm<z.infer<typeof stockTransferSchema>>({
         resolver: zodResolver(stockTransferSchema),
-        defaultValues: { productId: "", quantity: 1, fromWarehouseId: "", toWarehouseId: "", recipient: "" },
+        defaultValues: { productId: "", quantity: 1, fromWarehouseId: "", toWarehouseId: "" },
     });
 
     useEffect(() => {
@@ -166,8 +162,6 @@ export function InventoryPage() {
                     warehouse: warehouse.name,
                     date: new Date().toISOString().split('T')[0],
                     createdAt: serverTimestamp(),
-                    recipient: values.recipient,
-                    createdBy: currentUser.email || 'System',
                 };
                 transaction.set(doc(collection(db, "movements")), movementData);
             });
@@ -209,8 +203,6 @@ export function InventoryPage() {
                     warehouse: `من ${fromWarehouse.name} إلى ${toWarehouse.name}`,
                     date: new Date().toISOString().split('T')[0],
                     createdAt: serverTimestamp(),
-                    recipient: values.recipient,
-                    createdBy: currentUser.email || 'System',
                 };
                 transaction.set(doc(collection(db, "movements")), movementData);
             });
@@ -248,16 +240,16 @@ export function InventoryPage() {
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel>المنتج</FormLabel>
-                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                <FormControl>
+                                            <FormControl>
+                                                <Select onValueChange={field.onChange} defaultValue={field.value}>
                                                     <SelectTrigger>
                                                         <SelectValue placeholder="اختر منتجاً" />
                                                     </SelectTrigger>
-                                                </FormControl>
-                                                <SelectContent>
-                                                    {products.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
-                                                </SelectContent>
-                                            </Select>
+                                                    <SelectContent>
+                                                        {products.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+                                                    </SelectContent>
+                                                </Select>
+                                            </FormControl>
                                             <FormMessage />
                                         </FormItem>
                                     )}
@@ -268,16 +260,16 @@ export function InventoryPage() {
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel>المستودع</FormLabel>
-                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                <FormControl>
+                                            <FormControl>
+                                                <Select onValueChange={field.onChange} defaultValue={field.value}>
                                                     <SelectTrigger>
                                                         <SelectValue placeholder="اختر مستودعاً" />
                                                     </SelectTrigger>
-                                                </FormControl>
-                                                <SelectContent>
-                                                    {warehouses.map(w => <SelectItem key={w.id} value={w.id}>{w.name}</SelectItem>)}
-                                                </SelectContent>
-                                            </Select>
+                                                    <SelectContent>
+                                                        {warehouses.map(w => <SelectItem key={w.id} value={w.id}>{w.name}</SelectItem>)}
+                                                    </SelectContent>
+                                                </Select>
+                                            </FormControl>
                                             <FormMessage />
                                         </FormItem>
                                     )}
@@ -290,19 +282,6 @@ export function InventoryPage() {
                                             <FormLabel>الكمية</FormLabel>
                                             <FormControl>
                                                 <Input type="number" {...field} />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={formIn.control}
-                                    name="recipient"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>لصالح من (المورد)</FormLabel>
-                                            <FormControl>
-                                                <Input placeholder="اسم المورد" {...field} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -336,16 +315,16 @@ export function InventoryPage() {
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel>المنتج</FormLabel>
-                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                <FormControl>
+                                            <FormControl>
+                                                <Select onValueChange={field.onChange} defaultValue={field.value}>
                                                     <SelectTrigger>
                                                         <SelectValue placeholder="اختر منتجاً" />
                                                     </SelectTrigger>
-                                                </FormControl>
-                                                <SelectContent>
-                                                    {products.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
-                                                </SelectContent>
-                                            </Select>
+                                                    <SelectContent>
+                                                        {products.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+                                                    </SelectContent>
+                                                </Select>
+                                            </FormControl>
                                             <FormMessage />
                                         </FormItem>
                                     )}
@@ -356,16 +335,16 @@ export function InventoryPage() {
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel>المستودع</FormLabel>
-                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                <FormControl>
+                                            <FormControl>
+                                                <Select onValueChange={field.onChange} defaultValue={field.value}>
                                                     <SelectTrigger>
                                                         <SelectValue placeholder="اختر مستودعاً" />
                                                     </SelectTrigger>
-                                                </FormControl>
-                                                <SelectContent>
-                                                    {warehouses.map(w => <SelectItem key={w.id} value={w.id}>{w.name}</SelectItem>)}
-                                                </SelectContent>
-                                            </Select>
+                                                    <SelectContent>
+                                                        {warehouses.map(w => <SelectItem key={w.id} value={w.id}>{w.name}</SelectItem>)}
+                                                    </SelectContent>
+                                                </Select>
+                                            </FormControl>
                                             <FormMessage />
                                         </FormItem>
                                     )}
@@ -378,19 +357,6 @@ export function InventoryPage() {
                                             <FormLabel>الكمية</FormLabel>
                                             <FormControl>
                                                 <Input type="number" {...field} />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={formOut.control}
-                                    name="recipient"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>لصالح من (العميل)</FormLabel>
-                                            <FormControl>
-                                                <Input placeholder="اسم العميل" {...field} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -424,16 +390,16 @@ export function InventoryPage() {
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel>المنتج</FormLabel>
-                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                <FormControl>
+                                            <FormControl>
+                                                <Select onValueChange={field.onChange} defaultValue={field.value}>
                                                     <SelectTrigger>
                                                         <SelectValue placeholder="اختر منتجاً" />
                                                     </SelectTrigger>
-                                                </FormControl>
-                                                <SelectContent>
-                                                    {products.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
-                                                </SelectContent>
-                                            </Select>
+                                                    <SelectContent>
+                                                        {products.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+                                                    </SelectContent>
+                                                </Select>
+                                            </FormControl>
                                             <FormMessage />
                                         </FormItem>
                                     )}
@@ -444,16 +410,16 @@ export function InventoryPage() {
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel>من مستودع</FormLabel>
-                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                <FormControl>
+                                            <FormControl>
+                                                <Select onValueChange={field.onChange} defaultValue={field.value}>
                                                     <SelectTrigger>
                                                         <SelectValue placeholder="اختر المستودع المصدر" />
                                                     </SelectTrigger>
-                                                </FormControl>
-                                                <SelectContent>
-                                                    {warehouses.map(w => <SelectItem key={w.id} value={w.id}>{w.name}</SelectItem>)}
-                                                </SelectContent>
-                                            </Select>
+                                                    <SelectContent>
+                                                        {warehouses.map(w => <SelectItem key={w.id} value={w.id}>{w.name}</SelectItem>)}
+                                                    </SelectContent>
+                                                </Select>
+                                            </FormControl>
                                             <FormMessage />
                                         </FormItem>
                                     )}
@@ -464,16 +430,16 @@ export function InventoryPage() {
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel>إلى مستودع</FormLabel>
-                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                <FormControl>
+                                            <FormControl>
+                                                <Select onValueChange={field.onChange} defaultValue={field.value}>
                                                     <SelectTrigger>
                                                         <SelectValue placeholder="اختر المستودع الهدف" />
                                                     </SelectTrigger>
-                                                </FormControl>
-                                                <SelectContent>
-                                                    {warehouses.map(w => <SelectItem key={w.id} value={w.id}>{w.name}</SelectItem>)}
-                                                </SelectContent>
-                                            </Select>
+                                                    <SelectContent>
+                                                        {warehouses.map(w => <SelectItem key={w.id} value={w.id}>{w.name}</SelectItem>)}
+                                                    </SelectContent>
+                                                </Select>
+                                            </FormControl>
                                             <FormMessage />
                                         </FormItem>
                                     )}
@@ -486,19 +452,6 @@ export function InventoryPage() {
                                             <FormLabel>الكمية</FormLabel>
                                             <FormControl>
                                                 <Input type="number" {...field} />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={formTransfer.control}
-                                    name="recipient"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>لصالح من (المستلم)</FormLabel>
-                                            <FormControl>
-                                                <Input placeholder="اسم المستلم في المستودع الهدف" {...field} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -525,8 +478,6 @@ export function InventoryPage() {
                             <TableHead>المنتج</TableHead>
                             <TableHead>النوع</TableHead>
                             <TableHead>المستودع/الوجهة</TableHead>
-                            <TableHead>بواسطة</TableHead>
-                            <TableHead>لصالح من</TableHead>
                             <TableHead className="text-right">الكمية</TableHead>
                             <TableHead className="text-right">التاريخ</TableHead>
                         </TableRow>
@@ -538,8 +489,6 @@ export function InventoryPage() {
                                     <TableCell><Skeleton className="h-4 w-[150px]" /></TableCell>
                                     <TableCell><Skeleton className="h-4 w-[80px]" /></TableCell>
                                     <TableCell><Skeleton className="h-4 w-[200px]" /></TableCell>
-                                    <TableCell><Skeleton className="h-4 w-[150px]" /></TableCell>
-                                    <TableCell><Skeleton className="h-4 w-[150px]" /></TableCell>
                                     <TableCell className="text-right"><Skeleton className="h-4 w-[50px] ml-auto" /></TableCell>
                                     <TableCell className="text-right"><Skeleton className="h-4 w-[100px] ml-auto" /></TableCell>
                                 </TableRow>
@@ -557,8 +506,6 @@ export function InventoryPage() {
                                     </Badge>
                                 </TableCell>
                                 <TableCell>{mov.warehouse}</TableCell>
-                                <TableCell>{mov.createdBy}</TableCell>
-                                <TableCell>{mov.recipient}</TableCell>
                                 <TableCell className="text-right">{mov.quantity}</TableCell>
                                 <TableCell className="text-right">{mov.date}</TableCell>
                             </TableRow>
