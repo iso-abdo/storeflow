@@ -113,19 +113,23 @@ export function ProductsPage() {
         if (isCameraDialogOpen) {
             const getCameraPermission = async () => {
               try {
-                const stream = await navigator.mediaDevices.getUserMedia({video: true});
+                const stream = await navigator.mediaDevices.getUserMedia({video: { facingMode: { exact: "environment" } }});
                 setHasCameraPermission(true);
         
                 if (videoRef.current) {
                   videoRef.current.srcObject = stream;
                 }
-              } catch (error) {
+              } catch (error: any) {
                 console.error('Error accessing camera:', error);
                 setHasCameraPermission(false);
+                let description = 'يرجى تمكين أذونات الكاميرا في إعدادات متصفحك.';
+                if (error.name === 'OverconstrainedError' || error.name === 'NotFoundError') {
+                    description = 'لم يتم العثور على الكاميرا الخلفية. قد لا تكون مدعومة على هذا الجهاز.';
+                }
                 toast({
                   variant: 'destructive',
-                  title: 'تم رفض الوصول إلى الكاميرا',
-                  description: 'يرجى تمكين أذونات الكاميرا في إعدادات متصفحك.',
+                  title: 'خطأ في الوصول إلى الكاميرا',
+                  description: description,
                 });
               }
             };
@@ -206,10 +210,10 @@ export function ProductsPage() {
                                 </DialogDescription>
                             </DialogHeader>
                             <Form {...form}>
-                                <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4 py-4">
-                                    <FormItem className="grid grid-cols-4 items-start gap-4 pt-4">
-                                        <FormLabel className="text-right pt-2">صورة المنتج</FormLabel>
-                                        <div className="col-span-3 flex items-center gap-4">
+                                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                                    <FormItem>
+                                        <FormLabel>صورة المنتج</FormLabel>
+                                        <div className="flex items-center gap-4">
                                             <div className="w-24 h-24 rounded-md bg-muted flex items-center justify-center border">
                                                 <Image 
                                                     src={capturedImage || "https://placehold.co/400x400.png"} 
@@ -230,12 +234,12 @@ export function ProductsPage() {
                                         control={form.control}
                                         name="name"
                                         render={({ field }) => (
-                                            <FormItem className="grid grid-cols-4 items-center gap-4">
-                                                <FormLabel className="text-right">اسم المنتج</FormLabel>
+                                            <FormItem>
+                                                <FormLabel>اسم المنتج</FormLabel>
                                                 <FormControl>
-                                                    <Input {...field} className="col-span-3" />
+                                                    <Input {...field} />
                                                 </FormControl>
-                                                <FormMessage className="col-span-4 text-right" />
+                                                <FormMessage />
                                             </FormItem>
                                         )}
                                     />
@@ -243,12 +247,12 @@ export function ProductsPage() {
                                         control={form.control}
                                         name="barcode"
                                         render={({ field }) => (
-                                            <FormItem className="grid grid-cols-4 items-center gap-4">
-                                                <FormLabel className="text-right">الباركود</FormLabel>
+                                            <FormItem>
+                                                <FormLabel>الباركود</FormLabel>
                                                 <FormControl>
-                                                    <Input {...field} className="col-span-3" />
+                                                    <Input {...field} />
                                                 </FormControl>
-                                                <FormMessage className="col-span-4 text-right" />
+                                                <FormMessage />
                                             </FormItem>
                                         )}
                                     />
@@ -256,12 +260,12 @@ export function ProductsPage() {
                                         control={form.control}
                                         name="category"
                                         render={({ field }) => (
-                                            <FormItem className="grid grid-cols-4 items-center gap-4">
-                                                <FormLabel className="text-right">الفئة</FormLabel>
+                                            <FormItem>
+                                                <FormLabel>الفئة</FormLabel>
                                                 <FormControl>
-                                                    <Input {...field} className="col-span-3" />
+                                                    <Input {...field} />
                                                 </FormControl>
-                                                <FormMessage className="col-span-4 text-right" />
+                                                <FormMessage />
                                             </FormItem>
                                         )}
                                     />
@@ -269,12 +273,12 @@ export function ProductsPage() {
                                         control={form.control}
                                         name="price"
                                         render={({ field }) => (
-                                            <FormItem className="grid grid-cols-4 items-center gap-4">
-                                                <FormLabel className="text-right">السعر</FormLabel>
+                                            <FormItem>
+                                                <FormLabel>السعر</FormLabel>
                                                 <FormControl>
-                                                    <Input type="number" {...field} className="col-span-3" />
+                                                    <Input type="number" {...field} />
                                                 </FormControl>
-                                                <FormMessage className="col-span-4 text-right" />
+                                                <FormMessage />
                                             </FormItem>
                                         )}
                                     />
@@ -282,12 +286,12 @@ export function ProductsPage() {
                                         control={form.control}
                                         name="stock"
                                         render={({ field }) => (
-                                            <FormItem className="grid grid-cols-4 items-center gap-4">
-                                                <FormLabel className="text-right">المخزون</FormLabel>
+                                            <FormItem>
+                                                <FormLabel>المخزون</FormLabel>
                                                 <FormControl>
-                                                    <Input type="number" {...field} className="col-span-3" />
+                                                    <Input type="number" {...field} />
                                                 </FormControl>
-                                                <FormMessage className="col-span-4 text-right" />
+                                                <FormMessage />
                                             </FormItem>
                                         )}
                                     />
@@ -295,12 +299,12 @@ export function ProductsPage() {
                                         control={form.control}
                                         name="min_stock"
                                         render={({ field }) => (
-                                            <FormItem className="grid grid-cols-4 items-center gap-4">
-                                                <FormLabel className="text-right">أدنى مخزون</FormLabel>
+                                            <FormItem>
+                                                <FormLabel>أدنى مخزون</FormLabel>
                                                 <FormControl>
-                                                    <Input type="number" {...field} className="col-span-3" />
+                                                    <Input type="number" {...field} />
                                                 </FormControl>
-                                                <FormMessage className="col-span-4 text-right" />
+                                                <FormMessage />
                                             </FormItem>
                                         )}
                                     />
