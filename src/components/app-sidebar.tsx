@@ -81,6 +81,7 @@ export function AppSidebar() {
   ];
 
   return (
+    <div className="hidden md:block">
     <>
       <SidebarHeader>
         <div className="flex items-center justify-center p-2">
@@ -115,5 +116,6 @@ export function AppSidebar() {
         </div>
       </SidebarFooter>
     </>
+    </div>
   );
 }

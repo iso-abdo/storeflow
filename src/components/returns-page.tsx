@@ -206,7 +206,7 @@ export function ReturnsPage() {
         : returns;
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="w-full max-w-xl mx-auto flex flex-col gap-6 md:w-3/4">
         <div className="flex items-center justify-between">
             <h1 className="font-headline text-3xl font-bold tracking-tighter">المرتجعات</h1>
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
