@@ -234,7 +234,7 @@ export function InventoryPage() {
                         </DialogHeader>
                         <Form {...formIn}>
                             <form onSubmit={formIn.handleSubmit((v) => handleMovement('إدخال', v))}>
-                                <div className="space-y-4 max-h-[70vh] overflow-y-auto p-1 pr-4">
+                                <div className="space-y-4 max-h-[60vh] overflow-y-auto p-1 pr-4">
                                     <FormField
                                         control={formIn.control}
                                         name="productId"
@@ -289,7 +289,7 @@ export function InventoryPage() {
                                         )}
                                     />
                                 </div>
-                                <DialogFooter className="pt-4">
+                                <DialogFooter className="pt-4 border-t mt-4">
                                     <Button type="submit">حفظ</Button>
                                 </DialogFooter>
                             </form>
@@ -311,7 +311,7 @@ export function InventoryPage() {
                         </DialogHeader>
                         <Form {...formOut}>
                             <form onSubmit={formOut.handleSubmit((v) => handleMovement('إخراج', v))}>
-                                <div className="space-y-4 max-h-[70vh] overflow-y-auto p-1 pr-4">
+                                <div className="space-y-4 max-h-[60vh] overflow-y-auto p-1 pr-4">
                                     <FormField
                                         control={formOut.control}
                                         name="productId"
@@ -366,7 +366,7 @@ export function InventoryPage() {
                                         )}
                                     />
                                 </div>
-                                <DialogFooter className="pt-4">
+                                <DialogFooter className="pt-4 border-t mt-4">
                                     <Button type="submit">إخراج</Button>
                                 </DialogFooter>
                             </form>
@@ -388,7 +388,7 @@ export function InventoryPage() {
                         </DialogHeader>
                         <Form {...formTransfer}>
                             <form onSubmit={formTransfer.handleSubmit(handleTransfer)}>
-                               <div className="space-y-4 max-h-[70vh] overflow-y-auto p-1 pr-4">
+                               <div className="space-y-4 max-h-[60vh] overflow-y-auto p-1 pr-4">
                                     <FormField
                                         control={formTransfer.control}
                                         name="productId"
@@ -463,7 +463,7 @@ export function InventoryPage() {
                                         )}
                                     />
                                </div>
-                                <DialogFooter className="pt-4">
+                                <DialogFooter className="pt-4 border-t mt-4">
                                     <Button type="submit">تحويل</Button>
                                 </DialogFooter>
                             </form>
